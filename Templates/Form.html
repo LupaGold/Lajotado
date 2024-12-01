@@ -1,0 +1,28 @@
+{% extends "Index.html" %}
+{% load static %}
+
+{% block main %}
+
+<div class="text-light container m-auto mt-3"> 
+    <div class="container d-flex">
+        <div>
+            <img src="{% static image %}" alt="">
+        </div>
+    <div class="ms-2">
+    <h3>{{titulo}}</h3>
+    <p>{{descricao}}
+    </p>
+</div>
+</div>
+    <div class="card m-auto mb-3 shadow text-light" style="background-color: #181818;">
+        <form class='m-2 mt-3' method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="d-flex justify-content-end">
+                <button class='btn m-2 mb-3' type="submit" style='background-color:silver; '>Registrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock main %}

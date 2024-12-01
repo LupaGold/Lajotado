@@ -1,0 +1,64 @@
+{% extends "Index.html" %}
+{% load static %}
+
+{% block main %}
+<div class="container mt-3 m-auto text-light">
+    <div class="container d-flex">
+        <div>
+            <img src="{% static 'relatorio.png'%}" alt="">
+        </div>
+    <div class="ms-2">
+    <h3>Minhas Licenças</h3>
+    <p>Solicite licença quando for se ausentar por mais de uma semana.
+    </p>
+</div>
+</div>
+<ul>
+  {% for message in messages %}
+  <div class="alert alert-secondary text-center">{{ message }}</div>
+  {% endfor %}
+</ul>
+<p class="d-inline-flex gap-1 m-sm-auto mb-2" >
+    <a class="btn btn-secondary" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+      Informações
+    </a>
+    <a href="{% url "RegistrarAval" %}" class="btn m-sm-auto" style='background:silver;'> Registrar Licença</a>
+  </p>
+  <div class="collapse" id="collapseExample" >
+    <div class="card card-body m-auto text-light mb-3 mt-2" style="background-color: #181818;">
+        Insira seus dados corretamente para concluir o processo de avaliação. 
+        Caso insira dados incorretas, poderá estar sujeito à reprovação. É importante cumprir os prazos de início de aval e fim de aval.
+<br>
+Caso se for ficar online em base pra ajudar movimentação deverá incluir na observação.  <br>
+Sempre confira seu aval no system antes de entrar no Habbo. Caso precise cancelar o processo, entre em contato com o fundador ou supremacia.
+    </div>
+  </div>
+  <div class="mt-3">
+    {% if avais %}
+    {% for aval in avais %}
+    <div class="card text-light mb-3 m-auto shadow col-12" style="background-color: #181818;">
+        <div class="row g-0">
+          <div class="col-md-4 text-center" >
+            <img class="mb-auto" src="https://www.habbo.com.br/habbo-imaging/avatarimage?img_format=png&user={{ aval.solicitante.username}}&direction=2&head_direction=2&size=l&action=std" class="img-fluid rounded-start" alt="...">
+          </div>
+          <div class="col-md-8">
+            <div class="card-body mt-3">
+              <p class="card-text"><strong> Motivo: </strong>{{aval.motivo}}</p>
+              <p class="card-text"><strong> Início: </strong>{{aval.data}}</p>
+              <p class="card-text"><strong> Fim: </strong>{{aval.data2}}</p>
+              <p class="card-text"><small class="text-body-light">Enviado em {{aval.datatime}}</small></p>
+              <span class="badge {% if aval.status == 'Aprovado' %} text-bg-success {% elif aval.status == 'Reprovado' %} text-bg-danger {% elif aval.status == 'Em análise...' %} text-bg-body {% endif %}">{{aval.status}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    <br>
+    {% endfor %}
+    {% else %}
+    <div class="alert alert-secondary text-center" role="alert">
+      Você não possui nenhuma licença registrada!
+    </div>    
+    {% endif %}
+  </div>
+</div>
+{% endblock main %}

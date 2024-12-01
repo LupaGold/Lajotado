@@ -1,0 +1,90 @@
+{% extends "Index.html" %}
+{% load static %}
+
+{% block main %}
+
+<div class="container mt-3 m-auto text-light">
+    <div class='row'>
+      <div class="mt-3 m-auto col-11 col-md-7 order-2 order-md-1">
+        <div class="container d-flex">
+          <div>
+              <img src="{% static 'relatorio.png'%}" alt="">
+          </div>
+      <div class="ms-2">
+      <h3>Meus Relatórios de Treinamento</h3>
+      <p>Fique atento aos enviar seus relatórios, sempre verifique os campos.
+      </p>
+    </div>
+    </div>
+    <ul>
+      {% for message in messages %}
+      <div class="alert alert-secondary text-center">{{ message }}</div>
+      {% endfor %}
+  </ul>
+    <p class="d-inline-flex gap-1 m-sm-auto mb-2" >
+    <a href="{% url 'Treinamentos'%}" class="btn btn-secondary m-sm-auto"> Treinamentos</a>
+    <a href="{% url "RegistrarRelatorioTreinamento" %}" class="btn m-sm-auto" style="background-color: silver;"> Registrar Relatório +</a>
+    </p>
+        {% if relatorios %}
+        {% for relatorio in relatorios %}
+            <a class="card m-1 p-3 text-light text-decoration-none mb-3" style="background-color: #181818;" data-bs-toggle="collapse" href="#{{relatorio.pk}}" role="button" aria-expanded="false" aria-controls="{{relatorio.pk}}">
+                <div class="d-flex">
+                    <div class="col-2 mt-md-3 mt-5 mb-2">
+                        <div class="rounded-circle m-auto px" style="background: url({% static 'auxilios.png'%}) center center no-repeat; width: 40px; height: 40px;transform: scale(2.0);">
+                        </div>
+                    </div>
+                    <div class="col-8">
+                        <div class="container text-light">
+                            <h5>Treinamento {{relatorio.treinamento}}</h5>
+                            <p>{{relatorio.datatime}}</p>
+                            <p>
+                            <span class="badge {% if relatorio.status == 'Aprovado' %} text-bg-success {% elif relatorio.status == 'Reprovado' %} text-bg-danger {% elif relatorio.status == 'Em análise...' %} text-bg-body {% endif %}">{{relatorio.status}}</span>
+                          </div>
+                    </div>
+                </div>
+            </a>
+          <div class="collapse" id="{{relatorio.pk}}">
+            <div class="card card-body" style="background-color: #181818;">
+              <strong>Data:</strong> {{relatorio.datatime}} <br>
+              <strong>Treinador:</strong>{{relatorio.solicitante.patente}} {{relatorio.solicitante.username}} <br>
+              <strong>Treinamento:</strong> {{relatorio.treinamento}} <br>
+              <strong>Aprovados:</strong> {{relatorio.aprovado}} <br>
+              <strong>Reprovados:</strong> {{relatorio.reprovado}} <br>
+              <strong>Observações:</strong> {{relatorio.obs}}<br>
+            </div>
+          </div>
+          {% endfor %}
+          {% else %}
+          <div class="alert alert-secondary mx-auto mt-3 text-center" role="alert">
+            Você não possue nenhum treinamento registrado.
+          </div>
+          {% endif %}
+        </div>
+      <div class='col-11 col-md-5 order-1 order-md-2 mx-auto'>
+        <div class="container d-flex mt-4">
+          <div>
+            <img class="px" src="{% static 'bolsa.gif'%}" alt="">
+            </div>
+          <div class="ms-2">
+          <h3>Meus dados</h3>
+          <p>Fique atento aos números!</p>
+          </div>
+        </div>
+        <div class="card mt-3" style="background-color: #181818;">
+          <div class="mt-2 mb-2 list-group list-group-flush text-center rounded m-auto col-10">
+            <li class="list-group-item">Total de treinamentos:
+                <span class="badge text-dark rounded-pill" style="background-color: silver;">{{ total }}</span></li>
+        </div>
+        <hr class="text-light m-auto col-10">
+        <div class="m-auto mt-3 mb-3">
+        {% for item in contador %}
+        <li class="list-group-item text-light mb-2"><img class="px" src="{% static 'trinamentos2.gif'%}" alt="">{{ item.treinamento__titulo }}:
+          <span class="badge text-bg-light rounded-pill" style="background: #93110e">{{ item.total }}</span></li>
+        {% endfor %}
+        </div>
+      </div>
+        </div>
+    </div>
+    </div>
+
+{% endblock main %}

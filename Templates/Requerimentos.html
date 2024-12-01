@@ -1,0 +1,108 @@
+{% extends "Index.html" %}
+{% load static %}
+
+{% block main %}
+
+<div class="container mt-3 m-auto mb-3">
+    <div class='row'>
+      <div class="mt-3 m-auto col-11 col-md-7 order-2 order-md-1 text-light">
+        <div class="container d-flex">
+          <div>
+              <img src="{% static 'drh.gif'%}" alt="">
+          </div>
+      <div class="ms-2">
+      <h3>Todos os Requerimentos</h3>
+      <p>Fique atento aos analisar os requerimentos, sempre verifique os campos.
+    </div>
+    </div>
+    {% if messages %}
+    <ul>
+        {% for message in messages %}
+        <div class="alert alert-secondary text-center">{{ message }}</div>
+        {% endfor %}
+    </ul>
+    {% endif %}
+        {% if relatorios %}
+        {% for relatorio in relatorios %}
+        <a class="card m-1 p-3 text-light text-decoration-none mb-3" style="background-color: #181818;" data-bs-toggle="collapse" href="#{{relatorio.pk}}" role="button" aria-expanded="false" aria-controls="{{relatorio.pk}}">
+            <div class="d-flex">
+                <div class="col-4 col-md-2 mt-md-3 mt-5 mb-2">
+                  <div class="rounded-circle border border-3 border-light m-1" style="background: url(https://www.habbo.com.br/habbo-imaging/avatarimage?img_format=png&user={{relatorio.solicitante.username}}&direction=2&head_direction=2&size=sm&action=std) center 35% no-repeat, url({% static 'bgfloresta.png'%}) center center no-repeat; width: 80px; height: 80px;">	
+                  </div>
+                </div>
+                <div class="col-md-8 col-8">
+                    <div class="container text-light">
+                        <h5>Requerimento de {{relatorio.requerimento}}</h5>
+                        <p>{{relatorio.datatime}}</p>
+                        <p>Enviado por {{relatorio.solicitante.patente}}, {{relatorio.solicitante.username}}</p>
+                        <p><small>{{relatorio.data}}</small></p>
+                        <p>
+                        <span class="badge {% if relatorio.status == 'Aprovado' %} text-bg-success {% elif relatorio.status == 'Reprovado' %} text-bg-danger {% elif relatorio.status == 'Em análise...' %} text-bg-body {% endif %}">{{relatorio.status}}</span>
+                      </div>
+                </div>
+            </div>
+        </a>
+      <div class="collapse" id="{{relatorio.pk}}">
+        <div class="card card-body" style="background-color: #181818;">
+          <strong>Data:</strong> {{relatorio.datatime}} <br>
+          <strong>Solicitante:</strong>{{relatorio.solicitante.patente}} {{relatorio.solicitante.username}} <br>
+          <strong>Policial:</strong> {{relatorio.policial}} <br>
+          <strong>Observação:</strong> {{relatorio.obs}} <br>
+          <div class='d-flex'>
+            {% if relatorio.status == 'Em análise...' or relatorio.status == 'Reprovado' %}
+            <form class="m-1" action="{% url 'AprovarRequerimento' relatorio.id %}" method="post">
+                {% csrf_token %}
+                <button class="btn btn-success btn-sm" type="submit">Aprovar</button>
+            </form>
+                {% endif %}
+                {% if relatorio.status == 'Em análise...' or relatorio.status == 'Aprovado' %}
+                <form class="m-1" action="{% url 'ReprovarRequerimento' relatorio.id %}" method="post">
+                {% csrf_token %}
+                <button class="btn btn-danger btn-sm" type="submit">Reprovar</button>
+            </form>{% endif %}
+          </div>
+        </div>
+      </div>
+
+          {% endfor %}
+          {% else %}
+          <div class="alert alert-secondary mx-auto text-center mt-3" role="alert">
+            Nenhum requerimento foi encontrado!
+          </div>
+          {% endif %}
+        </div>
+      <div class='col-11 col-md-5 order-1 order-md-2 mx-auto'>
+        <div class="container d-flex mt-4">
+          <div>
+            <img class="px" src="{% static 'bolsa.gif'%}" alt="">
+            </div>
+          <div class="ms-2 text-light">
+          <h3>Informações</h3>
+          <p>Fique atento aos números!</p>
+          </div>
+        </div>
+        <form class="input-group mt-3" method="get">
+            <input class='form-control' type="text" name="q">
+            <button class=" btn text-light" style="background:#181818;" type=" submit">
+                <i class='icon'>
+                    <img width="35px" src="{% static "lupa.gif" %}" alt="">
+                  </i></button>
+        </form>
+        <div class="card mt-3" style="background-color: #181818;">
+          <div class="mt-2 mb-2 list-group list-group-flush text-center rounded m-auto col-10">
+            <li class="list-group-item">Total de Requerimentos:
+                <span class="badge text-bg-dark text-light rounded-pill">{{ total }}</span></li>
+        </div>
+        <hr class="text-light m-auto col-10">
+        <div class="m-auto mt-3 mb-3">
+        {% for item in contador %}
+        <li class="list-group-item text-light mb-2" style="background: #181818">{{ item.requerimento }}s:
+          <span class="badge text-bg-light  rounded-pill" style="background: #93110e">{{ item.total }}</span></li>
+        {% endfor %}
+        </div>
+      </div>
+        </div>
+    </div>
+    </div>
+
+{% endblock main %}

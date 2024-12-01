@@ -1,0 +1,102 @@
+{% extends "Index.html" %}
+{% load static %}
+
+{% block main %}
+<div class="container m-auto">
+    <div class="row m-auto">
+<div class="col-11 col-md-6">
+    <div class="container d-flex mt-3 mb-3">
+        <div>
+            <img src="{% static 'identidade.png'%}" alt="">
+        </div>
+    <div class="ms-2 text-light">
+    <h3>Perfil</h3>
+    </div>
+    </div>
+<div class="card mb-3 m-auto" style="background: #181818">
+    <div class="container m-auto">
+        <div class=" col-md-12 mb-3 mt-3 m-auto col-12 ">
+            <div class="card m-1" style='background:#111111;'>
+                <div class="text-center">
+                    <img class="px" width="140px" src="http://www.habbo.com.br/habbo-imaging/avatarimage?&user={{ perfil.username }}&action=std&direction=2&head_direction=3&img_format=png&gesture=sml&frame=1&headonly=0&size=l" style="position: relative; top: -20px; " alt="...">
+                </div>
+                    <div class="m-auto col-md-8 col-10">
+                        <ul class="list-group m-1">
+                            <li class="list-group-item text-light border-0" style="background: #181818">Nickname: {{perfil.username}}</li>
+                            </ul>
+                <ul class="list-group m-1">
+                    <li class="list-group-item text-light border-0" style="background: #181818">Patente: {{perfil.patente}}</li>
+                    </ul>
+                    <ul class="list-group m-1">
+                        <li class="list-group-item text-light border-0" style="background: #181818">Status: {{perfil.status}}</li>
+                        </ul>
+        </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<div class="col-md-5 col-11">
+{% if emblemas %}
+<div class="container d-flex mt-4 mb-3"> 
+    <div>
+      <img class="px" width="26px" height="41px" src="{% static 'emblema.png'%}" alt="">
+      </div>
+    <div class="ms-2">
+    <h3 class="text-light">Emblemas</h3>
+    </div>
+</div>
+        <div class="card m-auto" style="background: #181818">
+        <div class="row mt-2 col-10 m-auto">
+            {% for emblema in emblemas %}
+    <div class="card col-3 col-md-2 mb-3 m-1" style="background-color: #111111;" alt="{{ emblema.emblema.titulo }}">
+        <img data-bs-toggle="tooltip" data-bs-placement="bottom"
+        data-bs-custom-class="custom-tooltip" data-bs-title="{{ emblema.emblema.titulo }}" src="{{ emblema.emblema.icone.url }}" class="m-auto mt-2 px" width="40px" alt="...">
+      </div>
+        {% endfor %}
+        </div>
+    </div>
+        {% endif %}
+</div>
+</div>
+<div class="m-auto container col-11 col-md-12 mb-5">
+    {% if logs %}
+    <section class="py-5">
+    <ul class="timeline-with-icons">
+    {% for log in logs %}
+    <li class="card timeline-item mb-5 col-10 m-auto text-light p-3" style="background: #181818">
+        <span class="timeline-icon">
+            {% if log.requerimento == 'Promoção' %}
+            <i class="fas fa-level-up text-success fa-sm fa-fw bg-body-success"></i>
+            {% endif %}
+            {% if log.requerimento == 'Rebaixamento' %}
+            <i class="fas fa-level-down text-danger fa-sm fa-fw"></i>
+            {% endif %}
+            {% if log.requerimento == 'Banimento' %}
+            <i class="fas fa-exclamation-triangle text-danger fa-sm fa-fw"></i>
+            {% endif %}
+            {% if log.requerimento == 'Treinamento' %}
+            <i class="fas fa-certificate text-primary fa-sm fa-fw"></i>
+            {% endif %}
+            {% if log.requerimento == 'Advertência' %}
+            <i class="fas fa-exclamation text-warning fa-sm fa-fw"></i>
+            {% endif %}
+            {% if log.requerimento == 'Demissão' %}
+            <i class="fas fa-times text-danger fa-sm fa-fw"></i>
+            {% endif %}
+        </span>
+        <h5 class="fw-bold">{{log.requerimento}}</h5>
+        <p class="text-light mb-2 fw-bold">{{log.datatime}}</p>
+        <p class="text-light">
+          {{log.texto}}
+        </p>
+        <hr class="text-light">
+      </li>
+    {% endfor %}
+    </ul>
+    </section>
+    {% endif %}
+</div>
+</div>
+{% endblock main %}
+

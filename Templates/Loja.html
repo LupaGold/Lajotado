@@ -1,0 +1,80 @@
+{% extends "Index.html" %}
+{% load static %}
+
+{% block main %}
+<div class="container text-light mt-3 m-auto">
+   <div class="row">
+    <div class="col-md-7 col-11 m-auto order-2 order-md-1">
+        <div class="container d-flex mb-3">
+            <div>
+                <img src="{% static 'loja.png'%}" alt="">
+            </div>
+        <div class="ms-2">
+        <h3>Loja de Emblemas</h3>
+        <p>Colecione emblemas exclusivos!</p>
+    </div>
+    </div>
+    <div class="row">
+        {% if messages %}
+    <ul>
+        {% for message in messages %}
+        <div class="alert alert-secondary text-center text-center">{{ message }}</div>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% for emblema in emblemas %}
+    <div class="card col-12 col-md-5 mb-3 m-auto bg-br text-light">
+        <img src="{{ emblema.icone.url }}" class="m-auto mt-2 px" width="80px" alt="...">
+        <div class="card-body">
+          <h5 class="card-title text-center">{{ emblema.titulo }}</h5>
+        <div class="text-center">
+            <div class=" d-flex mb-1 justify-content-center">
+            <div class="text-center">
+                <h5>{{ emblema.moedas }}</h5>
+            </div>
+            <div>
+                <img src="{% static 'coinloja.png'%}" alt="">
+            </div>
+    </div>
+</div>
+    {% if emblema.id not in emblemas_comprados %}
+        <form action="{% url 'ComprarEmblema' emblema.id %}" class="justify-content-center d-flex" method="post">
+            {% csrf_token %}
+            <button class="btn btn-sm" style='background:silver;' type="submit">Comprar</button>
+        </form>
+    {% else %}
+    <div class="justify-content-center d-flex">
+        <button class="btn btn-sm btn-danger">Comprado!</button>
+    </div>
+    {% endif %}
+        </div>
+      </div>
+        {% endfor %}
+    </div>
+   </div>
+   <div class="col-md-5 col-11 mb-2 order-1 m-auto m-md-0 order-md-2">
+    <div class="container mb-1 d-flex mt-0 mt-md-4"> 
+        <div>
+          <img class="px" src="{% static 'bolsa.gif'%}" alt="">
+          </div>
+        <div class="ms-2">
+        <h3>Informações</h3>
+        <p>Não economize moedas!</p>
+        </div>
+      </div>
+      <a class="d-flex card col-lg-12 col-md-12 col-12 shadow m-auto action-text text-decoration-none bg-br" href="">
+        <div class="d-flex">
+            <div class="col-4 mt-2 mb-2">
+                <div class="rounded-circle m-auto px" style="background: url({% static 'loja.png'%}) center center no-repeat; width: 60px; height: 60px;">	
+                </div> 
+            </div>
+            <div class="text-light col-8">
+                <h5 class="text-center mt-2 mt-md-4 me-5">Total de emblemas: <span class="badge text-bg-danger">{{total}}</span>
+                </h5>
+            </div>
+        </div>
+    </a>
+   </div>
+</div>
+</div>
+{% endblock main %}

@@ -1,0 +1,217 @@
+{% extends "Index.html" %}
+{% load static %}
+
+{% block main %}
+<div class="container mb-5">
+    <div class="row m-auto">
+        <div class="col-lg-7">
+            <div class="container d-flex">
+                <div>
+                    <img src="{% static 'trofeu.png'%}" alt="">
+                </div>
+            <div class="ms-2 text-light">
+            <h3>Destaques</h3>
+            <p>Parabéns aos destaques!</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="card col-12 col-md-5 shadow m-auto mt-1 bg-br shadow" style="background-color: #181818;">
+            <div class="d-flex m-1">
+            <div class="card mt-2 mb-2 shadow ms-3 bg-br bg-opacity-50" style="background-color: #111111;">
+                <div class="rounded-circle m-auto" style="background: url(https://www.habbo.com.br/habbo-imaging/avatarimage?img_format=png&user={{destaques.destaque1}}&direction=2&head_direction=2&size=l&headonly=1) center center no-repeat; width: 80px; height: 80px;">	
+                </div>                
+            </div>
+            <div class="text-center text-light m-auto">
+                <strong><p class="text-center mt-2" style="font-size:20px;">Destaque</p></strong>
+            <strong><p class="text-center" style="position: relative; top: -10px; font-size:15px;">{{destaques.destaque1}}</p></strong>
+            </div>
+        </div>
+        </div>
+        <div class="card col-12 col-md-5 shadow m-auto mt-1 bg-br shadow" style="background-color: #181818;">
+            <div class="d-flex m-1">
+            <div class="card mt-2 mb-2 shadow ms-3 bg-br bg-opacity-50" style="background-color: #111111;">
+                <div class="rounded-circle m-auto" style="background: url(https://www.habbo.com.br/habbo-imaging/avatarimage?img_format=png&user={{destaques.destaque2}}&direction=2&head_direction=2&size=l&headonly=1) center center no-repeat; width: 80px; height: 80px;">	
+                </div>                
+            </div>
+            <div class="text-light text-center m-auto">
+                <strong><p class="text-center mt-2" style="font-size:20px;">Destaque</p></strong>
+            <strong><p class="text-center" style="position: relative; top: -10px; font-size:15px;">{{destaques.destaque2}}</p></strong>
+            </div>
+        </div>
+        </div>
+    </div>
+            <div class="container text-light d-flex mb-4 mb-lg-0 mt-4 ">
+                <div>
+                    <img src="{% static 'carteira.png'%}" alt="">
+                </div>
+            <div class="ms-2">
+            <h3>Busca Policial</h3>
+            <p>Busque pelos registros por aqui!</p>
+        </div>
+    </div>
+    <div class="container card mt-2 m-auto shadow" style="background-color: #181818;">
+        <form class='input-group mt-2 mb-2' method="get">
+            <input class='form-control' type="text" name="search" style='background:#f8f9fa;'>
+            <button style="background: #111111" class='btn' type="submit">
+                <i>
+                    <img width="35px" src="{% static "lupa.gif" %}" alt="">
+                  </i>
+            </button>
+        </form>
+</div>
+{% if busca %}
+        <div class='container card bg-br shadown mt-3'>
+        {% if policial %}
+        <p class="m-1 text-light"><strong> Resultado da Busca: </strong></p>
+        
+            {% for user in policial %}
+            <div class="card mb-3 shadow" style="background-color: #111111;">
+                <div class="row g-0">
+                  <div class="col-xl-4 m-auto d-flex justify-content-center align-items-center">
+                    <div class="rounded-circle border border-3 border-light m-1" style="background: url(https://www.habbo.com.br/habbo-imaging/avatarimage?img_format=png&user={{user.username}}&direction=2&head_direction=2&size=sm&action=std) center 35% no-repeat, url({% static 'bgfloresta.png'%}) center center no-repeat; width: 100px; height: 100px;">	
+                    </div>
+            </div>
+                  <div class="col-md-8 mt-3">
+                    <div class="card-body text-light">
+                        <p> <strong> Nickname: </strong> {{user.username}}</p>
+                        <p> <strong> Patente: </strong> {{user.patente}}</p>
+                        <p> <strong> Patente: </strong> {{user.status}}</p>
+                        <a class="btn m-1 text-light btn-secondary" href="{% url "PerfilPolicial" user.slug %}">Acessar Perfil</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+            {% else %}
+            <div class="alert alert-success m-auto mt-3 mb-3 col-12 text-center" role="alert">
+              Militar não encontrado!
+            </div>
+              
+      {% endif %}
+    </div>
+      {% endif %}
+        <div class="container text-light d-flex mb-2 mb-lg-0 mt-4 ">
+            <div>
+                <img src="{% static 'forum.gif'%}" alt="">
+            </div>
+        <div class="ms-2">
+        <h3>Fórum</h3>
+        <p>Realize publicações.</p>
+        </div>
+        </div>
+        <div class="container card" style="background: #181818">
+            <form class='mt-3 mb-3' method="post">
+                {% csrf_token %}
+                <div class="d-flex ">
+                    <div class="rounded-circle border border-3 border-light m-auto col-4" style="background: url(https://www.habbo.com.br/habbo-imaging/avatarimage?img_format=png&user={{ request.user.username}}&direction=2&head_direction=2&size=sm&action=std) center 30% no-repeat, url({% static 'bgfloresta.png'%}) center center no-repeat; width: 80px; height: 80px;">	
+                    </div>
+                    <div class="container col-10">
+                    {{ form.as_p }}
+                </div>
+            </div>
+            <hr class="text-light">
+            <div class="d-flex justify-content-end me-3">
+                <button class="btn btn-sm mt-2" style="background-color: silver;">Publicar</button>
+            </div>
+            </form>
+        </div>
+        {% for post in posts %}
+        <div class="container card mt-3" style="background-color: #181818;">
+            <div class="row mt-3 mb-3">
+                <div class="col-2">
+                    <div class="rounded-circle border border-2 border-light m-auto" style="background: url(https://www.habbo.com.br/habbo-imaging/avatarimage?img_format=png&user={{ post.autor.username}}&direction=2&head_direction=2&size=sm&action=std) center 35% no-repeat, url({% static 'bgfloresta.png'%}) center center no-repeat; width: 60px; height: 60px;">	
+                    </div>
+                </div>
+                <div class="col-10 text-light">
+                    <h5 class="mt-1">{{ post.autor.username}}</h5>
+                    <p><small>{{post.data}}</small></p>
+                    <div class="card" style="background-color: #181818;">
+                        <p class="m-2 text-light">{{post.texto}}</p>
+                    </div>
+                    {% if post.comentarios.all %}
+                    <p class="mt-2">Comentários:</p>
+                          {% for comentario in post.comentarios.all %}
+                          <div class="card mb-2" style="background-color: #181818;">
+                          <div class="row mt-2 mb-2">
+                            <div class="col-2">
+                                <div class="rounded-circle border border-2 border-light m-auto px" style="background: url(https://www.habbo.com.br/habbo-imaging/avatarimage?img_format=png&user={{ comentario.autor.username}}&direction=2&head_direction=2&size=sm&action=std) center 35% no-repeat, url({% static 'bgfloresta.png'%}) center center no-repeat; width: 50px; height: 50px;">	
+                                </div>
+                            </div>
+                            <div class="col-10 text-light">
+                                <p>{{comentario.autor.username}}</p>
+                                <p>{{comentario.texto}}</p>
+                            </div>
+                          </div>
+                        </div>
+                      {% endfor %}
+                      {% endif %}
+                      
+                      <form class="mt-2" method="post">
+                        <div class="input-group">
+                        {% csrf_token %}
+                        {{ comentario_form.as_p }}
+                        <input type="hidden" name="post_id" value="{{ post.id }}">
+                        <div>
+                            <button class="btn ms-3 text-dark" style='background: silver;' type="submit">Comentar</button>
+                        </div>
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        </div>
+        <div class="col-lg-5">
+            <div class="container d-flex text-light mt-4 mb-3"> 
+                <div>
+                  <img class="px" width="26px" height="41px" src="{% static 'emblema.png'%}" alt="">
+                  </div>
+                <div class="ms-2">
+                <h3>Emblemas novos!</h3>
+                <p>Confira o último emblema adicionado!</p>
+                </div>
+        </div>
+        
+        <div class="card col-12 col-md-8 mb-3 m-auto" style="background-color: #181818;">
+            <img src="{{ emblema.icone.url }}" class="m-auto mt-2 px" width="80px" alt="...">
+            <div class="card-body">
+              <h5 class="card-title text-center text-light">{{ emblema.titulo }}</h5>
+              <div class="text-center">
+                <div class=" d-flex justify-content-center">
+                <div class="text-center text-light">
+                    <h5>{{ emblema.moedas }}</h5>
+                </div>
+                <div>
+                    <img src="{% static 'coinloja.png'%}" alt="">
+                </div>
+        </div>
+    </div>
+            </div>
+          </div>
+            <div class="container d-flex mt-4">
+                <div>
+                    <img src="{% static 'busca.png'%}" alt="">
+                </div>
+            <div class="ms-2 text-light">
+            <h3>Novos membros</h3>
+            <p>Sejam bem-vindos a Polícia RHC!</p>
+            </div>
+                    </div>
+            <div class="card bg-br col-10 m-auto">
+              <div class="mb-3 m-auto">
+                {% if alistados %}
+                {% for alistado in alistados %}
+                <a><img data-bs-toggle="tooltip" data-bs-placement="bottom"
+                  data-bs-custom-class="custom-tooltip" data-bs-title="{{alistado.patente}}, {{alistado.username}}" src='https://www.habbo.com.br/habbo-imaging/avatarimage?user={{alistado.username}}'/></a>
+                {% endfor %}
+                {% else %}
+                <div class="alert alert-success m-auto mt-3" role="alert">
+                  Sem alistamentos recentes!
+                </div>
+                    {% endif %}
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock main %}

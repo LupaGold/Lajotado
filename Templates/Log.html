@@ -1,0 +1,20 @@
+{% extends "Index.html" %}
+{% load static %}
+
+{% block main %}
+<div class="container m-auto">
+
+  {% if logs %}
+  <ul class="list-group">
+  {% for log in logs %}
+  <li class="list-group-item list-group-item-secondary">({{log.datatime}}) {{log.texto}}</li>
+  {% endfor %}
+</ul>
+  {% else %}
+  <div class="alert alert-secondary m-auto mt-3 text-center" role="alert">
+    Sem logs recentes!
+  </div>
+      {% endif %}
+</div>
+{% endblock main %}
+
