@@ -135,12 +135,12 @@
               <ul class="sub-menu">
                 <li><a class="link_name" href="#">Treinamentos</a></li>
                 <li><a href="{% url "RelatoriosTreinamentos" %}">Meus Relatórios</a></li>
-                <li><a href="{% url "RelatoriosGeral" %}">Relatórios Geral</a></li>
                 <li><a href="{% url "Treinamentos" %}">Treinamentos</a></li>
                 {% if GuiasDpE or MinistroDpE or STAFF or LDPE %}
                 <li><a href="{% url "RegistrarTreinamentos" %}">Add Treinamento+</a></li>
                 {% endif %}
                 {% if MinistroDpE or STAFF or LDPE %}
+                <li><a href="{% url "RelatoriosGeral" %}">Relatórios Geral</a></li>
                 <li><a href="{% url "GuiasDpE" %}">Guias</a></li>
                 {% endif %} 
                   {% if STAFF or LDPE %}

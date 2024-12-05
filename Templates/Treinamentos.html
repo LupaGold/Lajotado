@@ -2,9 +2,8 @@
 {% load static %}
 
 {% block main %}
-<div class="container mt-3 mb-3 m-auto text-light">
-    <div class='row'>
-        <div class="mt-3 m-auto col-11 col-md-7 order-2 order-md-1">
+<div class="container mb-3 m-auto text-light">
+        <div class="mt-3 m-auto col-11">
             <div class="container d-flex mt-4">
                 <div>
                   <img class="px" src="{% static 'bolsa2.gif'%}" alt="">
@@ -36,52 +35,10 @@
               <div class="collapse mb-2" id="{{treinamento.pk}}">
                 <div class="card card-body text-dark">
                     {{ treinamento.treinamento | safe }}
-                    <a href="{% url 'EditarTreinamento' treinamento.pk %}" class="btn-sm btn btn-secondary col-10 m-auto text-center">Editar</a>
+                    <a href="{% url 'EditarTreinamento' treinamento.pk %}" class="btn-sm btn btn-dark col-10 m-auto text-center">Editar</a>
                 </div>
               </div>
               {% endfor %}
         </div>
-        <div class='col-11 col-md-5 order-1 order-md-2 mx-auto mt-md-3'>
-            <div class="container d-flex mt-4">
-                <div>
-                  <img class="px" src="{% static 'jornal.png'%}" alt="">
-                  </div>
-                <div class="ms-2">
-                <h3>Informações</h3>
-                <p>Conheça o Departamento Educacional da RHC!</p>
-                </div>
-              </div>
-              <div class="card mt-3 m-auto shadow col-10" style="background-color: #181818;">
-                <img src="{% static 'dpe.gif'%}" class="px m-auto mt-3" alt="..." width="80px" height="80px" >
-                <div class="card-body text-light">
-                  <h5 class="card-title text-center">Departamento Educacional</h5>
-
-                </div>
-              </div>
-              <div class="container d-flex mt-4">
-                <div>
-                    <img src="{% static 'busca.png'%}" alt="">
-                </div>
-              <div class="ms-2 text-light">
-              <h3>Novos membros</h3>
-              <p>Sejam bem-vindos a Polícia RHC!</p>
-              </div>
-                    </div>
-              <div class="card bg-br col-10 m-auto">
-              <div class="mb-3 m-auto">
-                {% if alistados %}
-                {% for alistado in alistados %}
-                <a><img data-bs-toggle="tooltip" data-bs-placement="bottom"
-                  data-bs-custom-class="custom-tooltip" data-bs-title="{{alistado.patente}}, {{alistado.username}}" src='https://www.habbo.com.br/habbo-imaging/avatarimage?user={{alistado.username}}'/></a>
-                {% endfor %}
-                {% else %}
-                <div class="alert alert-secondary m-auto mt-3" role="alert">
-                  Sem alistamentos recentes!
-                </div>
-                    {% endif %}
-              </div>
-              </div>
-        </div>
-    </div>
   </div>
 {% endblock main %}

@@ -176,7 +176,7 @@ class Treinamentos(models.Model):
     #Usuário que registrou o treinamento
     solicitante = models.ForeignKey(get_user_model(), on_delete=models.CASCADE,blank=True, null=True, related_name='solicitantetreinamentos')
     #Título do treinamento
-    titulo = models.TextField(blank=False, null=True, max_length=30)
+    titulo = models.TextField(blank=False, null=True, max_length=100)
     #Treinamento escrito no Editor de texto
     treinamento = CKEditor5Field('Treinamentos', config_name='extends', default=' ')
     #Data e tempo de atualização do treinamento

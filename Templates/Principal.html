@@ -201,7 +201,7 @@
               <div class="mb-3 m-auto">
                 {% if alistados %}
                 {% for alistado in alistados %}
-                <a><img data-bs-toggle="tooltip" data-bs-placement="bottom"
+                <a href="{% url "PerfilPolicial" alistado.slug %}"><img data-bs-toggle="tooltip" data-bs-placement="bottom"
                   data-bs-custom-class="custom-tooltip" data-bs-title="{{alistado.patente}}, {{alistado.username}}" src='https://www.habbo.com.br/habbo-imaging/avatarimage?user={{alistado.username}}'/></a>
                 {% endfor %}
                 {% else %}

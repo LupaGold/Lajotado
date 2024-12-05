@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from django.views.static import serve
 from django.conf import settings
-from ControleDeAcesso.views import LoginViewModificada
+from ControleDeAcesso.views import LoginViewModificada, CadastroView
 from django.views.generic.base import RedirectView
 from django.urls import reverse_lazy
 from django.contrib.auth import logout
@@ -33,6 +33,7 @@ urlpatterns = [
     re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
     path("ckeditor5/", include('django_ckeditor_5.urls'), name="ck_editor_5_upload_file"),
     path('admin/', admin.site.urls),
+    path('alterar-acesso/', CadastroView.as_view(), name='AlterarAcesso'),
     path('system/', include('System.urls')),
     path('login/', LoginViewModificada.as_view(), name='Login'),
     path('', RedirectView.as_view(url=reverse_lazy('PainelPrincipal'))),

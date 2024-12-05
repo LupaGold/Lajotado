@@ -449,7 +449,7 @@ class RegistrarTreinamento(GroupRequiredMixin, CreateView):
 class RelatoriosTreinamentos(GroupRequiredMixin, TemplateView):
     model = RelatorioTreinamento
     template_name = 'Relatorios.html'
-    group_required = [u'STAFF', u'LDPE', u'GUIADpE', u'MinistroDpE']
+    group_required = [u'STAFF', u'LDPE', u'GuiaDpE', u'MinistroDpE']
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -463,7 +463,7 @@ class RegistrarRelatorioTreinamento(GroupRequiredMixin, CreateView):
     model = RelatorioTreinamento
     template_name = 'Form.html'
     form_class = RelatorioForm
-    group_required = [u'STAFF', u'LDPE', u'GUIADpE', u'MinistroDpE']
+    group_required = [u'STAFF', u'LDPE', u'GuiaDpE', u'MinistroDpE']
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -477,6 +477,8 @@ class RegistrarRelatorioTreinamento(GroupRequiredMixin, CreateView):
         if form.is_valid():
             form.instance.solicitante = self.request.user
             form.instance.datatime = timezone.now()
+            if form.instance.treinamento.titulo == "Curso de Formação de Agentes":
+                form.instance.status = 'Aprovado'
             new = form.save()
 
             try:
@@ -484,6 +486,35 @@ class RegistrarRelatorioTreinamento(GroupRequiredMixin, CreateView):
                     texto=f"{new.solicitante} enviou um relatório de treinamento",
                     datatime=timezone.now(),
                 )
+                log.save()
+                if new.treinamento.titulo == "Curso de Formação de Agentes":
+                    aprovado_username = new.aprovado.strip()  # Supondo que 'aprovado' seja o campo com o nome de usuário
+                    if aprovado_username:
+                        User = get_user_model()
+                        try:
+                            # Tenta encontrar um usuário com o username fornecido
+                            aprovado_user = User.objects.get(username=aprovado_username)
+                        except User.DoesNotExist:
+                            # Se o usuário não existir, cria um novo usuário
+                            aprovado_user = User.objects.create_user(
+                                username=aprovado_username,
+                                password='fauiuaufauj20981428042',  # Defina uma senha padrão ou gere uma
+                                patente='Agente',
+                            )
+                log0 = LogTimeLine.objects.create(
+                                    policial=new.aprovado,
+                                    texto=f"O policial {new.aprovado} ingressou na RHC!",
+                                    datatime=timezone.now(),
+                                    requerimento='Ingresso'
+                                )
+                log0.save()
+                # Criando o log de aprovação
+                log = LogTimeLine.objects.create(
+                                    policial=new.aprovado,
+                                    texto=f"O policial {new.aprovado} foi aprovado no {new.treinamento.titulo} pelo instrutor {new.solicitante.username}. Observações: {new.obs}",
+                                    datatime=timezone.now(),
+                                    requerimento='Treinamento'
+                                )
                 log.save()
                 messages.success(request, f'Relatório registrado!')
             except Exception as e:
@@ -594,7 +625,7 @@ class AdicionarGuia(GroupRequiredMixin, View):
                 )
         log.save()
         messages.success(request, f'Você nomeou {user.username} como Guia do Departamento Educacional!')
-        return redirect('Guias')
+        return redirect('GuiasDpE')
 
 @method_decorator(csrf_protect, name='dispatch')
 class RemoverGuia(GroupRequiredMixin, View):
@@ -610,7 +641,7 @@ class RemoverGuia(GroupRequiredMixin, View):
                 )
         log.save()
         messages.success(request, f'Você exonerou {user.username} como Guia do Departamento Educacional!')
-        return redirect('Guias')
+        return redirect('GuiasDpE')
     
 @method_decorator(csrf_protect, name='dispatch')
 class AdicionarMinistroDpE(GroupRequiredMixin, View):
@@ -626,7 +657,7 @@ class AdicionarMinistroDpE(GroupRequiredMixin, View):
                 )
         log.save()
         messages.success(request, f'Você nomeou {user.username} como Ministro do Departamento Educacional!')
-        return redirect('MinistroDpE')
+        return redirect('MinistrosDpE')
 
 @method_decorator(csrf_protect, name='dispatch')
 class RemoverMinistroDpE(GroupRequiredMixin, View):
@@ -642,7 +673,7 @@ class RemoverMinistroDpE(GroupRequiredMixin, View):
                 )
         log.save()
         messages.success(request, f'Você exonerou {user.username} como Ministro do Departamento Educacional!')
-        return redirect('MinistroDpE')
+        return redirect('MinistrosDpE')
     
 class GuiasDpEView(GroupRequiredMixin, ListView):
     group_required = [u'STAFF', u'LDPE', u'MinistroDpE']
@@ -1495,7 +1526,7 @@ class ResetarSenhaStaff(GroupRequiredMixin, View):
         user.set_password('123')
         user.save()
         messages.success(request, f'O policial {user.username} teve sua senha resetada: (123).')
-        return redirect('PoliciaisLista')
+        return redirect('PoliciaisListaStaff')
 
 class CriarDestaque(GroupRequiredMixin, CreateView):
     model = Destaques

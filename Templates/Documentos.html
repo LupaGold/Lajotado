@@ -4,7 +4,7 @@
 {% block main %}
 <div class="container mt-3 mb-3 m-auto text-light">
     <div class='row'>
-        <div class="mt-3 m-auto col-11 col-md-7 order-2 order-md-1">
+        <div class=" m-auto col-11">
             <div class="container d-flex mt-4">
                 <div>
                   <img class="px" src="{% static 'bolsa2.gif'%}" alt="">
@@ -22,11 +22,11 @@
               {% for documento in Documentos %}
                 <a class="btn bg-pt btn-dark mb-3 col-12 shadow" data-bs-toggle="collapse" href="#{{documento.pk}}" role="button" aria-expanded="false" aria-controls="{{documento.pk}}">
                     <div class="d-flex">
-                        <div class="col-4 mt-md-3 mt-5 mb-2">
-                            <div class="rounded-circle mb-md-0 mb-sm-4 mx-auto px" style="background: url({% static 'treinamentos2.gif' %}) center center no-repeat; width: 60px; height: 60px;transform: scale(2.0);">
+                        <div class="col-3 mt-md-3 mt-5 mb-2">
+                            <div class="rounded-circle mb-md-0 mb-sm-4 mx-auto px" style="background: url({% static 'bolsa2.gif' %}) center center no-repeat; width: 60px; height: 60px;transform: scale(2.0);">
                             </div>
                         </div>
-                        <div class="col-8 m-auto">
+                        <div class="col-9 m-auto">
                             <div class="container text-light">
                                 <h5>{{documento.titulo}}</h5>
                               </div>
@@ -37,36 +37,11 @@
                 <div class="card card-body text-dark">
                     {{ documento.documentos | safe }}
                     {% if STAFF %}
-                    <a href="{% url 'EditarDocumentos' documento.pk %}" class="btn-sm btn btn-secondary col-10 m-auto text-center">Editar</a>
+                    <a href="{% url 'EditarDocumentos' documento.pk %}" class="btn-sm btn btn-dark col-10 m-auto text-center">Editar</a>
                     {% endif %}
                   </div>
               </div>
               {% endfor %}
-        </div>
-        <div class='col-11 col-md-5 order-1 order-md-2 mx-auto mt-md-3'>
-              <div class="container d-flex mt-4">
-                <div>
-                    <img src="{% static 'busca.png'%}" alt="">
-                </div>
-              <div class="ms-2 text-light">
-              <h3>Novos membros</h3>
-              <p>Sejam bem-vindos a Polícia RHC!</p>
-              </div>
-                    </div>
-              <div class="card bg-br col-10 m-auto">
-              <div class="mb-3 m-auto">
-                {% if alistados %}
-                {% for alistado in alistados %}
-                <a><img data-bs-toggle="tooltip" data-bs-placement="bottom"
-                  data-bs-custom-class="custom-tooltip" data-bs-title="{{alistado.patente}}, {{alistado.username}}" src='https://www.habbo.com.br/habbo-imaging/avatarimage?user={{alistado.username}}'/></a>
-                {% endfor %}
-                {% else %}
-                <div class="alert alert-secondary m-auto mt-3" role="alert">
-                  Sem alistamentos recentes!
-                </div>
-                    {% endif %}
-              </div>
-              </div>
         </div>
     </div>
   </div>
