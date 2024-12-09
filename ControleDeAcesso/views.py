@@ -12,6 +12,9 @@ import random
 import string
 import requests
 from django.views.generic import TemplateView, ListView, DetailView, View, CreateView, UpdateView
+from urllib.request import urlopen, Request
+from urllib.error import URLError, HTTPError
+import json
 
 class AlterarSenhaView(LoginRequiredMixin, PasswordChangeView):
     template_name = 'Form.html'  
@@ -42,28 +45,25 @@ class CadastroView(TemplateView):
     
     def get(self, request):
         codigo_aleatorio = self.GerarCódigo()
+        request.session['codigo_aleatorio'] = codigo_aleatorio  # Armazena o código na sessão
         form = CadastroForm(initial={'codigo_aleatorio': codigo_aleatorio})
         return render(request, self.template_name, {'form': form, 'codigo_aleatorio': codigo_aleatorio})
 
     def post(self, request, *args, **kwargs):
-        codigo_aleatorio = self.GerarCódigo() 
-        form = CadastroForm(request.POST, initial={'codigo_aleatorio': codigo_aleatorio})
+        form = CadastroForm(request.POST)
+        codigo_aleatorio = request.session.get('codigo_aleatorio')  # Recupera da sessão
         if form.is_valid():
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
-            codigo_aleatorio = request.POST.get('codigo_aleatorio')
-
             if self.CheckarCódigo(username, codigo_aleatorio):
-                # self.AlterarSenha(username, password)
-                # return redirect('Login')
-                form.add_error(None, 'Código aleatório válido')  
+                self.AlterarSenha(username, password)
+                return redirect('Login')
             elif not self.CheckarUsuario(username):
                 form.add_error(None, 'Policial não registrado!')
-
-            if not self.CheckarCódigo(username, codigo_aleatorio):
-                form.add_error(None, 'Código aleatório inválido')  
-
+            else:
+                form.add_error(None, 'Código aleatório inválido')
         return render(request, self.template_name, {'form': form, 'codigo_aleatorio': codigo_aleatorio})
+
     
     def GerarCódigo(self):
         letters = string.ascii_uppercase
@@ -94,6 +94,7 @@ class CadastroView(TemplateView):
         except requests.exceptions.RequestException as e:
             print(f"Erro ao acessar a API: {e}")
             return False
+        
     def AlterarSenha(self, username, password):
         user = PolicialUsuario.objects.get(username=username)
         user.set_password(password)

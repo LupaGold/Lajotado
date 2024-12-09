@@ -1,0 +1,79 @@
+{% extends "Index.html" %}
+{% load static %}
+
+{% block main %}
+
+<div class="text-light container m-auto mt-3"> 
+    <div class="container d-flex">
+        <div>
+            <img src="{% static 'dpl.gif' %}" alt="">
+        </div>
+    <div class="ms-2">
+    <h3>Membros</h3>
+    <p>Adicione novos membros ao Departamento de Lotas!
+    </p>
+</div>
+</div>
+<ul>
+  {% for message in messages %}
+  <div class="alert alert-secondary text-center">{{ message }}</div>
+  {% endfor %}
+</ul>
+<form class="input-group mt-3" method="get">
+    <input class='form-control' type="text" name="q">
+    <button class=" btn text-light" style="background-color: #181818;" type=" submit">
+        <i class='icon'>
+            <img width="35px" src="{% static "lupa.gif" %}" alt="">
+          </i></button>
+</form>
+<nav class="navbar rounded-1 bg-br mt-3 justify-content-center shadow">
+    <ul class="nav justify-content-center">
+    <strong><h3 class="text-light " aria-current="page">Membros</h3></strong>
+      </ul>
+  </nav>
+  <div class="row mt-3 justify-content-center mb-3 m-auto col-10">
+    {% if membros %}
+    {% for membro in membros %}
+    <div class='card col-10 col-md-3 m-2 mt-2 text-center shadow bg-br text-light'>
+        <img width="64" height="110" src="https://www.habbo.com.br/habbo-imaging/avatarimage?img_format=png&user={{ membro.username}}&direction=2&head_direction=2&size=sm&action=std" class="rounded-start px m-auto" >
+        <strong><p style="font-size:25px; position: relative; top: 20px;"> {{membro.username}}</p></strong> <br>
+    <p style="font-size:20px; position: relative; top: -20px;"> {{membro.patente}}</p><br>
+    <form method="post" action="{% url 'RemoverMEMBRODPL' membro.id %}">
+        {% csrf_token %}
+        <button style="position: relative; top: -20px;" type="submit" class="btn btn-danger btn-sm">Remover</button>
+    </form>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="alert alert-secondary text-center m-auto" role="alert">
+        Nenhum membro encontrado!
+      </div>
+    {% endif %}
+  </div>
+  <nav class="navbar rounded-1 bg-br mt-3 justify-content-center shadow">
+    <ul class="nav justify-content-center">
+    <strong><h3 class="text-light " aria-current="page">Policiais</h3></strong>
+      </ul>
+  </nav>
+  <div class="row mt-3 justify-content-center mb-3 m-auto col-12">
+    {% if policiais %}
+    {% for membro in policiais %}
+    <div class='card col-10 col-md-3 m-2 mt-2 text-center shadow bg-br text-light'>
+        <img width="64" height="110" src="https://www.habbo.com.br/habbo-imaging/avatarimage?img_format=png&user={{ membro.username}}&direction=2&head_direction=2&size=sm&action=std" class="rounded-start px m-auto" >
+        <strong><p style="font-size:25px; position: relative; top: 20px;"> {{membro.username}}</p></strong> <br>
+    <p style="font-size:20px; position: relative; top: -20px;"> {{membro.patente}}</p><br>
+    <form method="post" action="{% url 'AdicionarMEMBRODPL' membro.id %}">
+        {% csrf_token %}
+        <button style="position: relative; top: -20px;" type="submit" class="btn btn-success btn-sm">Adicionar</button>
+    </form>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="alert alert-secondary text-center m-auto" role="alert">
+        Nenhum polícial encontrado!
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock main %}

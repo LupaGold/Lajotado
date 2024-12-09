@@ -68,7 +68,7 @@ class Post(models.Model):
       #Autor do post
       autor = models.ForeignKey(get_user_model(), on_delete=models.CASCADE,blank=True, null=True)
       #Texto do post
-      texto = models.TextField(blank=False, null=True, verbose_name='Texto', max_length=150)
+      texto = models.TextField(blank=False, null=True, verbose_name='Texto', max_length=300)
       
       def __str__(self):
         return str(self.autor)
@@ -239,7 +239,6 @@ class LogDocumentos(models.Model):
       def __str__(self):
         return f'{{{self.texto})}}'
       
-
 class Requerimento(models.Model):
     #Data e tempo de postagem
     datatime = models.DateTimeField(default=timezone.now)
@@ -299,3 +298,64 @@ class Destaques(models.Model):
 
     def __str__(self):
         return f'{{{self.destaque1} {self.destaque2})}}'
+    
+class LogDPO(models.Model):
+      #Texto da log
+      texto = models.TextField(blank=False, null=True, verbose_name='Texto relatorio', max_length=150)
+      #Data e tempo de criação da log
+      datatime = models.DateTimeField(default=timezone.now)
+
+      def __str__(self):
+        return f'{{{self.texto})}}'
+      
+class DPORelatório(models.Model):
+    #Data e tempo de atualização do treinamento
+    datatime = models.DateTimeField(default=timezone.now)
+    #Usuário que registrou o treinamento
+    solicitante = models.ForeignKey(get_user_model(), on_delete=models.CASCADE,blank=True, null=True, related_name='solicitantedpo')
+    #Contador
+    militares = models.IntegerField(default=0, editable=True)
+    #Contador
+    fundação = models.IntegerField(default=0, editable=True)
+    #Contador
+    motivo = models.TextField(blank=False, null=True, max_length=170)
+    #Imagem do banner da postagem
+    imagem = models.ImageField(upload_to='imagens/')
+
+      
+class DPOBanimento(models.Model):
+    #Data e tempo de atualização do treinamento
+    datatime = models.DateTimeField(default=timezone.now)
+    #Usuário que registrou o treinamento
+    solicitante = models.ForeignKey(get_user_model(), on_delete=models.CASCADE,blank=True, null=True, related_name='solicitantedpobanimento')
+    #Contador
+    resp = models.TextField(blank=False, null=True, max_length=170, verbose_name='Responsável')
+    #Contador
+    banido = models.TextField(blank=False, null=True, max_length=170)
+    #Contador
+    fundação = models.IntegerField(default=0, editable=True)
+    #Contador
+    motivo = models.TextField(blank=False, null=True, max_length=170)
+    #Imagem do banner da postagem
+    imagem = models.ImageField(upload_to='imagens/')
+
+class Lota(models.Model):
+    #Data e tempo de atualização do treinamento
+    datatime = models.DateTimeField(default=timezone.now)
+    #Usuário que registrou o treinamento
+    solicitante = models.ForeignKey(get_user_model(), on_delete=models.CASCADE,blank=True, null=True, related_name='solicitantelota')
+    #Contador
+    lotador = models.TextField(blank=False, null=True, max_length=170)
+    #Contador
+    recruta = models.TextField(blank=False, null=True, max_length=170)
+    #Imagem do banner da postagem
+    imagem = models.ImageField(upload_to='imagens/')
+
+class LogLota(models.Model):
+      #Texto da log
+      texto = models.TextField(blank=False, null=True, verbose_name='Texto relatorio', max_length=150)
+      #Data e tempo de criação da log
+      datatime = models.DateTimeField(default=timezone.now)
+
+      def __str__(self):
+        return f'{{{self.texto})}}'

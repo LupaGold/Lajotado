@@ -1,0 +1,108 @@
+{% extends "Index.html" %}
+{% load static %}
+
+{% block main %}
+
+<div class="container mt-3 m-auto mb-3">
+    <div class='row'>
+      <div class="mt-3 m-auto col-11 col-md-7 order-2 order-md-1 text-light">
+        <div class="container d-flex">
+          <div>
+              <img src="{% static 'dpo.gif'%}" alt="">
+          </div>
+      <div class="ms-2">
+      <h3>Todos os Relatórios de Base</h3>
+      <p>Fique atento aos corrigir os relatórios, sempre verifique os campos.
+    </div>
+    </div>
+    <ul>
+      {% for message in messages %}
+      <div class="alert alert-secondary text-center">{{ message }}</div>
+      {% endfor %}
+  </ul>
+        {% if relatorios %}
+        {% for relatorio in relatorios %}
+        <a class="card m-1 p-3 text-light text-decoration-none mb-3" style="background-color: #181818;" data-bs-toggle="collapse" href="#{{relatorio.pk}}" role="button" aria-expanded="false" aria-controls="{{relatorio.pk}}">
+            <div class="d-flex">
+                <div class="col-4 col-md-2 mt-md-3 mt-5 mb-2">
+                  <div class="rounded-circle border border-3 border-light m-1" style="background: url(https://www.habbo.com.br/habbo-imaging/avatarimage?img_format=png&user={{relatorio.solicitante.username}}&direction=2&head_direction=2&size=sm&action=std) center 35% no-repeat, url({% static 'bgfloresta.png'%}) center center no-repeat; width: 80px; height: 80px;">	
+                  </div>
+                </div>
+                <div class="col-md-8 col-8">
+                    <div class="container text-light">
+                        <h5>Relatório de Base</h5>
+                        <p>Enviado por {{relatorio.solicitante.patente}}, {{relatorio.solicitante.username}}</p>
+                        <p>{{relatorio.datatime}}</p>
+                        <p>
+                        <span class="badge {% if relatorio.status == 'Aprovado' %} text-bg-success {% elif relatorio.status == 'Reprovado' %} text-bg-danger {% elif relatorio.status == 'Em análise...' %} text-bg-body {% endif %}">{{relatorio.status}}</span>
+                      </div>
+                </div>
+            </div>
+        </a>
+      <div class="collapse" id="{{relatorio.pk}}">
+        <div class="card card-body" style="background-color: #181818;">
+          <strong>Data:</strong> {{relatorio.datatime}} <br>
+          <strong>Militares:</strong>{{relatorio.militares}}<br>
+          <strong>Fundação:</strong> {{relatorio.fundação}} <br>
+          <strong>Motivo:</strong> {{relatorio.motivo}} <br>
+          <img src="{{ relatorio.imagem.url }}" class="card-img-top" alt="...">
+        </div>
+      </div>
+
+          {% endfor %}
+          {% else %}
+          <div class="alert alert-secondary mx-auto text-center mt-3" role="alert">
+            Nenhum relatório foi encontrado!
+          </div>
+          {% endif %}
+        </div>
+      <div class='col-11 col-md-5 order-1 order-md-2 mx-auto'>
+        <div class="container d-flex mt-4">
+          <div>
+            <img class="px" src="{% static 'bolsa.gif'%}" alt="">
+            </div>
+          <div class="ms-2 text-light">
+          <h3>Informações</h3>
+          <p>Fique atento aos números!</p>
+          </div>
+        </div>
+        <form class="input-group mt-3" method="get">
+            <input class='form-control' type="text" name="q">
+            <button class=" btn text-light" style="background:#181818;" type=" submit">
+                <i class='icon'>
+                    <img width="35px" src="{% static "lupa.gif" %}" alt="">
+                  </i></button>
+        </form>
+      <div class="container d-flex mt-4 mb-3">
+        <div>
+          <img class="px" src="{% static 'trofeu.png'%}" alt="">
+          </div>
+        <div class="ms-2 text-light">
+        <h3>Ranking</h3>
+        </div>
+      </div>
+      {% if ranking %}
+      {% for item in ranking %}
+      <div class="d-flex card col-lg-12 col-md-12 col-12 shadow m-auto mt-1 action-text text-decoration-none" style="background-color: {% if forloop.counter == 1 %}gold{% elif forloop.counter == 2 %}silver{% elif forloop.counter == 3 %}#cd7f32 {% else %}#93110e{% endif %};" href="">
+        <div class="d-flex">
+            <div class="col-2">
+                <div class="ms-5 rounded-circle m-auto px" style="background: url({% if forloop.counter == 1 %}{% static 'primeiro.gif'%}{% elif forloop.counter == 2 %}{% static 'segundo.gif'%}{% elif forloop.counter == 3 %}{% static 'terceiro.gif'%}{% endif %}) center center no-repeat; width: 60px; height: 60px;">
+                </div>
+            </div>
+            <div class="text-light col-10">
+                <p class="text-center me-4 mt-3">{{ item.solicitante__username }} <span class="badge text-bg-light  rounded-pill">{{ item.total }}</span>
+                </p>
+            </div>
+        </div>
+    </div>
+      {% endfor %}
+      {% else %}
+      <div class="alert alert-secondary text-center m-auto mt-3">
+        Ranking zerado!
+      </div>
+      {% endif %}
+        </div>
+    </div>
+    </div>
+
+{% endblock main %}

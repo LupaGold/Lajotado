@@ -1,5 +1,7 @@
 from django import forms
-from .models import Comentario, Post, JA, PostagemJornal, Treinamentos, RelatorioTreinamento, Documentos, Requerimento, Destaques
+from .models import (Comentario, Post, JA, PostagemJornal, Treinamentos, 
+                     RelatorioTreinamento, Documentos, Requerimento, Destaques,
+                     DPOBanimento, DPORelatório, Lota)
 from django_ckeditor_5.widgets import CKEditor5Widget
 
 #Form do comentario
@@ -96,4 +98,34 @@ class DestaqueForm(forms.ModelForm):
         widgets = {
             'destaque1': forms.TextInput(attrs={'class': 'form-control'}),
             'destaque2': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+class DPORelatórioForm(forms.ModelForm):
+    class Meta:
+        model = DPORelatório
+        fields = ['militares','fundação', 'motivo', 'imagem',]
+        widgets = {
+            'militares': forms.NumberInput(attrs={'class': 'form-control'}),
+            'fundação': forms.NumberInput(attrs={'class': 'form-control'}),
+            'motivo': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+class DPOBanimentoForm(forms.ModelForm):
+    class Meta:
+        model = DPOBanimento
+        fields = ['resp','banido', 'fundação', 'motivo','imagem',]
+        widgets = {
+            'resp': forms.TextInput(attrs={'class': 'form-control','label':'Responsável'}),
+            'banido': forms.TextInput(attrs={'class': 'form-control'}),
+            'fundação': forms.TextInput(attrs={'class': 'form-control'}),
+            'motivo': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+class LotaForm(forms.ModelForm):
+    class Meta:
+        model = Lota
+        fields = ['lotador','recruta','imagem']
+        widgets = {
+            'lotador': forms.TextInput(attrs={'class': 'form-control'}),
+            'recruta': forms.TextInput(attrs={'class': 'form-control'}),
         }

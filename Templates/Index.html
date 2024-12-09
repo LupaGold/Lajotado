@@ -75,14 +75,14 @@
                   <i class='bx'>
                     <img class="px" width="35px" src="{% static "relatorio.png" %}" alt="">
                   </i>
-                  <span class="link_name">Licenças</span>
+                  <span class="link_name">Avais</span>
                 </a>
                 <i class='bx bxs-chevron-down arrow' ></i>
               </div>
               <ul class="sub-menu">
-                <li><a class="link_name" href="#">Licenças</a></li>
-                <li><a href="{% url 'MeusAvais'%}">Minhas Licenças</a></li>
-                <li><a href="{% url "RegistrarAval" %}">Registrar Licença +</a></li>
+                <li><a class="link_name" href="#">Avais</a></li>
+                <li><a href="{% url 'MeusAvais'%}">Meus Avais</a></li>
+                <li><a href="{% url "RegistrarAval" %}">Registrar Aval +</a></li>
                 {% if STAFF or LDRH or Analista %}
                 <li><a href="{% url "GeralAvais" %}">Todas as Licenças</a></li>
                 {% endif %}
@@ -135,9 +135,9 @@
               <ul class="sub-menu">
                 <li><a class="link_name" href="#">Treinamentos</a></li>
                 <li><a href="{% url "RelatoriosTreinamentos" %}">Meus Relatórios</a></li>
-                <li><a href="{% url "Treinamentos" %}">Treinamentos</a></li>
+                <li><a href="{% url "Treinamentos" %}">Scripts</a></li>
                 {% if GuiasDpE or MinistroDpE or STAFF or LDPE %}
-                <li><a href="{% url "RegistrarTreinamentos" %}">Add Treinamento+</a></li>
+                <li><a href="{% url "RegistrarTreinamentos" %}">Add Script+</a></li>
                 {% endif %}
                 {% if MinistroDpE or STAFF or LDPE %}
                 <li><a href="{% url "RelatoriosGeral" %}">Relatórios Geral</a></li>
@@ -146,6 +146,56 @@
                   {% if STAFF or LDPE %}
                 <li><a href="{% url "MinistrosDpE" %}">Ministros</a></li>
                 {% endif %} 
+              </ul>
+            </li>
+            {% endif %}
+            {% if STAFF or MEMBRODPL or LDPL or MINISTRODPL %}
+            <li class="mt-2">
+              <div class="iocn-link">
+                <a href="#">
+                  <i class='bx'>
+                    <img class="px" width="40px" src="{% static "dpl.gif" %}" alt="">
+                  </i>
+                  <span class="link_name">DpL</span>
+                </a>
+                <i class='bx bxs-chevron-down arrow' ></i>
+              </div>
+              <ul class="sub-menu">
+                <li><a class="link_name" href="#">DpO</a></li>
+                {% if STAFF or MEMBRODPL or LDPL or MINISTRODPL %}
+                <li><a href="{% url "DPORelatórios" %}">Lotas</a></li>
+                <li><a href="{% url "RegistrarLota" %}">Add Lota</a></li>
+                {% endif %}
+                {% if STAFF or LDPL %}
+                <li><a href="{% url "MEMBRODPL" %}">Membros</a></li>
+                <li><a href="{% url "MINISTRODPL" %}">Ministros</a></li>
+                {% endif %}
+              </ul>
+            </li>
+            {% endif %}
+            {% if STAFF or MEMBRODPO or LDPO or MINISTRODPO %}
+            <li class="mt-2">
+              <div class="iocn-link">
+                <a href="#">
+                  <i class='bx'>
+                    <img class="px" width="40px" src="{% static "dpo.gif" %}" alt="">
+                  </i>
+                  <span class="link_name">DpO</span>
+                </a>
+                <i class='bx bxs-chevron-down arrow' ></i>
+              </div>
+              <ul class="sub-menu">
+                <li><a class="link_name" href="#">DpO</a></li>
+                {% if STAFF or MEMBRODPO or LDPO or MINISTRODPO %}
+                <li><a href="{% url "DPORelatórios" %}">Relatórios</a></li>
+                <li><a href="{% url "DPOBanimentos" %}">Banimentos</a></li>
+                <li><a href="{% url "RegistrarDPORelatório" %}">Add Relatório</a></li>
+                <li><a href="{% url "RegistrarDPOBanimento" %}">Add Banimento</a></li>
+                {% endif %}
+                {% if STAFF or LDPO %}
+                <li><a href="{% url "MEMBRODPO" %}">Membros</a></li>
+                <li><a href="{% url "MINISTRODPO" %}">Ministros</a></li>
+                {% endif %}
               </ul>
             </li>
             {% endif %}
@@ -166,10 +216,10 @@
                 <li><a href="{% url "Requerimentos" %}">Requerimentos</a></li>
                 <li><a href="{% url "RegistrarRequerimento" %}">Add Requerimento</a></li>
                 <li><a href="{% url "RegistrarRequerimentoContrato" %}">Contratar</a></li>
-                <li><a href="{% url "PoliciaisLista" %}">Senhas</a></li>
                 {% endif %}
                 {% if STAFF or LDRH %}
                 <li><a href="{% url "Analista" %}">Analistas</a></li>
+                <li><a href="{% url "PoliciaisLista" %}">Senhas</a></li>
                 {% endif %}
               </ul>
             </li>
@@ -209,6 +259,8 @@
               <ul class="sub-menu">
                 <li><a class="link_name" href="#">Admin</a></li>
                 <li><a href="{% url "LDPE" %}">Líder DpE</a></li>
+                <li><a href="{% url "LDPO" %}">Líder DpO</a></li>
+                <li><a href="{% url "LDPL" %}">Líder DpL</a></li>
                 <li><a href="{% url "LDRH" %}">Líder DrH</a></li>
                 <li><a href="{% url "EDC" %}">Editor-Chefe</a></li>
                 <li><a href="{% url "STAFF" %}">Membros</a></li>
@@ -216,6 +268,8 @@
                 <li><a href="{% url "CriarDestaque" %}">Destaque</a></li>
                 <br>
                 <li class='text-light'>Logs</li>
+                <li><a href="{% url "LOGSDPO" %}">Operacional</a></li>
+                <li><a href="{% url "LOGSLOTA" %}">Lota</a></li>
                 <li><a href="{% url "LOGDOCUMENTOS" %}">Documentos</a></li>
                 <li><a href="{% url "LOGPOSTAGENS" %}">Posts</a></li>
                 <li><a href="{% url "LOGREQUERIMENTOS" %}">Requerimentos</a></li>

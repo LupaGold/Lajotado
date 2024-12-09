@@ -11,4 +11,7 @@ class GroupContextMiddleware(MiddlewareMixin):
         response.context_data['Analista'] = request.user.groups.filter(name='Analista').exists()
         response.context_data['LDRH'] = request.user.groups.filter(name='LDRH').exists()
         response.context_data['STAFF'] = request.user.groups.filter(name='STAFF').exists()
+        response.context_data['MEMBRODPO'] = request.user.groups.filter(name='MEMBRODPO').exists()
+        response.context_data['MINISTRODPO'] = request.user.groups.filter(name='MINISTRODPO').exists()
+        response.context_data['LDPO'] = request.user.groups.filter(name='LDPO').exists()
         return response

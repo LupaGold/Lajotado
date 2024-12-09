@@ -4,13 +4,19 @@ from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.urls import reverse
 from braces.views import GroupRequiredMixin
+import random
+import string
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import FormMixin
 from .models import (Post, JA, LogJA, EmblemaCompra, EmblemasModel, PostagemJornal, 
                      LogPostagem, Treinamentos, LogTreinamento, RelatorioTreinamento,
-                     LogDocumentos, Documentos, Requerimento, LogRequerimento, LogTimeLine, PROMOCAO, LogStaff, Destaques)
+                     LogDocumentos, Documentos, Requerimento, LogRequerimento, LogTimeLine, PROMOCAO, LogStaff, Destaques,
+                     DPOBanimento, DPORelatório, Lota, LogDPO, LogLota)
+
 from .forms import (PostForm, ComentarioForm, JAForm, PostagemForm, 
-TreinamentosForm, RelatorioForm, DocumentosForm, RequerimentoForm, RequerimentoContratoForm, DestaqueForm)
+                    TreinamentosForm, RelatorioForm, DocumentosForm, RequerimentoForm, RequerimentoContratoForm, DestaqueForm, 
+                    LotaForm, DPORelatórioForm, DPOBanimentoForm)
+
 from ControleDeAcesso.models import PolicialUsuario, CARGOS
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
@@ -22,6 +28,7 @@ from django.utils.decorators import method_decorator
 from django.db.models import Count
 from django.contrib.auth import get_user_model
 from django.urls import reverse_lazy
+
 class PainelPrincipal(LoginRequiredMixin,TemplateView,FormMixin):
     template_name = 'Principal.html'
     model = Post
@@ -574,13 +581,13 @@ class AprovarRelatorio(GroupRequiredMixin, View):
                         password='fauiuaufauj20981428042',  # Defina uma senha padrão ou gere uma
                         patente='Agente',
                     )
-        log0 = LogTimeLine.objects.create(
+            log0 = LogTimeLine.objects.create(
                             policial=relatorio.aprovado,
                             texto=f"O policial {relatorio.aprovado} ingressou na RHC!",
                             datatime=timezone.now(),
                             requerimento='Ingresso'
-                        )
-        log0.save()
+                            )
+            log0.save()
         # Criando o log de aprovação
         log = LogTimeLine.objects.create(
                             policial=relatorio.aprovado,
@@ -905,7 +912,7 @@ class AprovarRequerimento(GroupRequiredMixin, View):
                 )
                 log = LogTimeLine.objects.create(
                                 policial=relatorio.policial,
-                                texto=f"Foi promovido para o cargo de {proxima_patente}. Motivo: {relatorio.obs}",
+                                texto=f"Foi promovido para o cargo de {proxima_patente} por {relatorio.solicitante.patente} {relatorio.solicitante.username}. Motivo: {relatorio.obs}",
                                 datatime=timezone.now(),
                                 requerimento='Promoção'
                             )
@@ -931,7 +938,7 @@ class AprovarRequerimento(GroupRequiredMixin, View):
                 )
                 log = LogTimeLine.objects.create(
                                 policial=relatorio.policial,
-                                texto=f"Foi rebaixado para o cargo de {proxima_patente}. Motivo: {relatorio.obs}",
+                                texto=f"Foi rebaixado para o cargo de {proxima_patente} por {relatorio.solicitante.patente} {relatorio.solicitante.username}. Motivo: {relatorio.obs}",
                                 datatime=timezone.now(),
                                 requerimento='Rebaixamento'
                             )
@@ -950,7 +957,7 @@ class AprovarRequerimento(GroupRequiredMixin, View):
                 )
                 log = LogTimeLine.objects.create(
                                 policial=relatorio.policial,
-                                texto=f"{relatorio.obs}",
+                                texto=f"Foi advertido por {relatorio.solicitante.patente} {relatorio.solicitante.username}. Motivo: {relatorio.obs}",
                                 datatime=timezone.now(),
                                 requerimento='Advertência'
                             )
@@ -969,7 +976,7 @@ class AprovarRequerimento(GroupRequiredMixin, View):
                 )   
                 log = LogTimeLine.objects.create(
                                 policial=relatorio.policial,
-                                texto=f"{relatorio.obs}",
+                                texto=f"Foi banido por {relatorio.solicitante.patente} {relatorio.solicitante.username}. Motivo: {relatorio.obs}",
                                 datatime=timezone.now(),
                                 requerimento='Banimento'
                             )
@@ -1024,7 +1031,7 @@ class AprovarRequerimento(GroupRequiredMixin, View):
             )
             log = LogTimeLine.objects.create(
                             policial=relatorio.policial,
-                            texto=f"{relatorio.obs}",
+                            texto=f"Foi contratado por {relatorio.solicitante.patente} {relatorio.solicitante.username} no cargo de {relatorio.cargo}. Motivo: {relatorio.obs}",
                             datatime=timezone.now(),
                             requerimento='Contrato'
                         )
@@ -1353,7 +1360,7 @@ class RegistrarRequerimentoContrato(GroupRequiredMixin, CreateView):
             try:
                 log = LogRequerimento.objects.create(
                     requerimento=new,
-                    texto=f"{new.solicitante} enviou um requerimento de {new.requerimento}",
+                    texto=f"{new.solicitante} enviou um requerimento de {new.requerimento}, Policial: {new.policial}",
                     datatime=timezone.now(),
                 )
                 log.save()
@@ -1449,7 +1456,7 @@ class PerfilPolicial(LoginRequiredMixin, DetailView):
         return context
     
 class ResetarSenha(GroupRequiredMixin, View):
-    group_required = [u'STAFF', u'Analista', u'LDRH']
+    group_required = [u'STAFF', u'LDRH']
     @method_decorator(csrf_protect)
     def post(self, request, user_id):
         patentes_permitidas = [
@@ -1470,11 +1477,17 @@ class ResetarSenha(GroupRequiredMixin, View):
                     datatime=timezone.now(),
                 )
         log.save()
-        user.set_password('123')
+
+        senha = self.GerarCódigo()
+        user.set_password(senha)
         user.save()
-        messages.success(request, f'O policial {user.username} teve sua senha resetada: (123).')
+        messages.success(request, f'O policial {user.username} teve sua senha resetada: {senha}.')
         return redirect('PoliciaisLista')
     
+    def GerarCódigo(self):
+            letters = string.ascii_uppercase
+            digits = ''.join(random.choice(string.digits) for _ in range(4))
+            return 'RHC' + digits
 class PoliciaisView(GroupRequiredMixin, ListView):
     template_name = 'PoliciaisLista.html'
     model = PolicialUsuario
@@ -1523,11 +1536,16 @@ class ResetarSenhaStaff(GroupRequiredMixin, View):
                     datatime=timezone.now(),
                 )
         log.save()
-        user.set_password('123')
+        senha = self.GerarCódigo()
+        user.set_password(senha)
         user.save()
-        messages.success(request, f'O policial {user.username} teve sua senha resetada: (123).')
+        messages.success(request, f'O policial {user.username} teve sua senha resetada: {senha}.')
         return redirect('PoliciaisListaStaff')
-
+    
+    def GerarCódigo(self):
+            letters = string.ascii_uppercase
+            digits = ''.join(random.choice(string.digits) for _ in range(4))
+            return 'RHC' + digits
 class CriarDestaque(GroupRequiredMixin, CreateView):
     model = Destaques
     template_name = 'Form.html'
@@ -1536,3 +1554,547 @@ class CriarDestaque(GroupRequiredMixin, CreateView):
     success_url = reverse_lazy('PainelPrincipal')
 
 
+class RegistrarLota(GroupRequiredMixin, CreateView):
+    model = Lota
+    template_name = 'Form.html'
+    form_class = LotaForm
+    group_required = [u'STAFF', u'LDPL', u'MINISTRODPL' u'MEMBRODPL']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["titulo"] = 'Registrar Lota'
+        context["image"] = 'dpl.gif'
+        context["descricao"] = 'Verifique todos os campos antes de registrar o Lota!'
+        return context
+    
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_valid():
+            form.instance.solicitante = self.request.user
+            form.instance.datatime = timezone.now()
+            new = form.save()
+
+            try:
+                log = LogLota.objects.create(
+                    texto=f"{new.solicitante} enviou um lota de {new.lotador}, recrutou: {new.recruta}. ",
+                    datatime=timezone.now(),
+                )
+                log.save()
+                messages.success(request, f'Lota registrado!')
+            except Exception as e:
+                print(f"Erro ao salvar o log: {e}")
+
+            return HttpResponseRedirect(reverse('Lotas'))
+        else:
+            return self.form_invalid(form)
+
+class RegistrarDPORelatório(GroupRequiredMixin, CreateView):
+    model = DPORelatório
+    template_name = 'Form.html'
+    form_class = DPORelatórioForm
+    group_required = [u'STAFF', u'LDPO', u'MINISTRODPO' u'MEMBRODPO']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["titulo"] = 'Registrar Relatório de Base'
+        context["image"] = 'dpo.gif'
+        context["descricao"] = 'Verifique todos os campos antes de registrar o Relatório!'
+        return context
+    
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_valid():
+            form.instance.solicitante = self.request.user
+            form.instance.datatime = timezone.now()
+            new = form.save()
+
+            try:
+                log = LogDPO.objects.create(
+                    texto=f"{new.solicitante} enviou um Relatório de Base: Militares: {new.militares}, Fudação: {new.fundação}, Motivo: {new.motivo}.",
+                    datatime=timezone.now(),
+                )
+                log.save()
+                messages.success(request, f'Relatório de Base registrado!')
+            except Exception as e:
+                print(f"Erro ao salvar o log: {e}")
+
+            return HttpResponseRedirect(reverse('DPORelatórios'))
+        else:
+            return self.form_invalid(form)
+        
+class RegistrarDPOBanimento(GroupRequiredMixin, CreateView):
+    model = DPOBanimento
+    template_name = 'Form.html'
+    form_class = DPOBanimentoForm
+    group_required = [u'STAFF', u'LDPO', u'MINISTRODPO' u'MEMBRODPO']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["titulo"] = 'Registrar o Banimento'
+        context["image"] = 'dpo.gif'
+        context["descricao"] = 'Verifique todos os campos antes de registrar o Banimento!'
+        return context
+    
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_valid():
+            form.instance.solicitante = self.request.user
+            form.instance.datatime = timezone.now()
+            new = form.save()
+
+            try:
+                log = LogDPO.objects.create(
+                    texto=f"{new.solicitante} enviou um Banimento: Responsável: {new.resp}, Banido: {new.banido}, Fundação: {new.fundação}, Motivo: {new.motivo}.",
+                    datatime=timezone.now(),
+                )
+                log.save()
+                messages.success(request, f'Relatório de Base registrado!')
+            except Exception as e:
+                print(f"Erro ao salvar o log: {e}")
+
+            return HttpResponseRedirect(reverse('DPOBanimentos'))
+        else:
+            return self.form_invalid(form)
+        
+class LogDPOView(GroupRequiredMixin, ListView):
+    model = LogDPO
+    template_name = 'Log.html'
+    context_object_name = 'logs'
+    group_required = [u'STAFF']
+
+    def get_queryset(self):
+        queryset = LogDPO.objects.all().order_by('-datatime')
+        return queryset
+
+class LogLotaView(GroupRequiredMixin, ListView):
+    model = LogLota
+    template_name = 'Log.html'
+    context_object_name = 'logs'
+    group_required = [u'STAFF']
+
+    def get_queryset(self):
+        queryset = LogLota.objects.all().order_by('-datatime')
+        return queryset
+
+@method_decorator(csrf_protect, name='dispatch')    
+class AdicionarMEMBRODPO(GroupRequiredMixin, View):
+    template_name = 'Form.html'
+    group_required = [u'STAFF', u'LDPO', u'MINISTRODPO']
+    def post(self, request, user_id):
+        user = get_object_or_404(PolicialUsuario, id=user_id)
+        group = Group.objects.get(name='MEMBRODPO')
+        user.groups.add(group)
+        log = LogDPO.objects.create(
+                    texto=f"{self.request.user} nomeou {user.username} como Membro do Departamento Operacional!",
+                    datatime=timezone.now(),
+                )
+        log.save()
+        messages.success(request, f'Você nomeou {user.username} como Membro do Departamento Operacional!')
+        return redirect('MEMBRODPO')
+
+@method_decorator(csrf_protect, name='dispatch')
+class RemoverMEMBRODPO(GroupRequiredMixin, View):
+    template_name = 'Form.html'
+    group_required = [u'STAFF', u'LDPO', u'MINISTRODPO']
+    def post(self, request, user_id):
+        user = get_object_or_404(PolicialUsuario, id=user_id)
+        group = Group.objects.get(name='MEMBRODPO')
+        user.groups.remove(group)
+        log = LogDPO.objects.create(
+                    texto=f"{self.request.user} exonerou {user.username} como Membro do Departamento Operacional!",
+                    datatime=timezone.now(),
+                )
+        log.save()
+        messages.success(request, f'Você exonerou {user.username} como Membro do Departamento Operacional!')
+        return redirect('MEMBRODPO')
+
+@method_decorator(csrf_protect, name='dispatch')    
+class AdicionarMINISTRODPO(GroupRequiredMixin, View):
+    template_name = 'Form.html'
+    group_required = [u'STAFF', u'LDPO']
+    def post(self, request, user_id):
+        user = get_object_or_404(PolicialUsuario, id=user_id)
+        group = Group.objects.get(name='MINISTRODPO')
+        user.groups.add(group)
+        log = LogDPO.objects.create(
+                    texto=f"{self.request.user} nomeou {user.username} como Ministro do Departamento Operacional!",
+                    datatime=timezone.now(),
+                )
+        log.save()
+        messages.success(request, f'Você nomeou {user.username} como Ministro do Departamento Operacional!')
+        return redirect('MINISTRODPO')
+
+@method_decorator(csrf_protect, name='dispatch')
+class RemoverMINISTRODPO(GroupRequiredMixin, View):
+    template_name = 'Form.html'
+    group_required = [u'STAFF', u'LDPO']
+    def post(self, request, user_id):
+        user = get_object_or_404(PolicialUsuario, id=user_id)
+        group = Group.objects.get(name='MINISTRODPO')
+        user.groups.remove(group)
+        log = LogDPO.objects.create(
+                    texto=f"{self.request.user} exonerou {user.username} como Ministro do Departamento Operacional!",
+                    datatime=timezone.now(),
+                )
+        log.save()
+        messages.success(request, f'Você exonerou {user.username} como Ministro do Departamento Operacional!')
+        return redirect('MINISTRODPO')
+    
+@method_decorator(csrf_protect, name='dispatch')    
+class AdicionarLDPO(GroupRequiredMixin, View):
+    template_name = 'Form.html'
+    group_required = [u'STAFF']
+    def post(self, request, user_id):
+        user = get_object_or_404(PolicialUsuario, id=user_id)
+        group = Group.objects.get(name='LDPO')
+        user.groups.add(group)
+        log = LogDPO.objects.create(
+                    texto=f"{self.request.user} nomeou {user.username} como Líder do Departamento Operacional!",
+                    datatime=timezone.now(),
+                )
+        log.save()
+        messages.success(request, f'Você nomeou {user.username} como Líder do Departamento Operacional!')
+        return redirect('LDPO')
+
+@method_decorator(csrf_protect, name='dispatch')
+class RemoverLDPO(GroupRequiredMixin, View):
+    template_name = 'Form.html'
+    group_required = [u'STAFF']
+    def post(self, request, user_id):
+        user = get_object_or_404(PolicialUsuario, id=user_id)
+        group = Group.objects.get(name='LDPO')
+        user.groups.remove(group)
+        log = LogDPO.objects.create(
+                    texto=f"{self.request.user} exonerou {user.username} como Líder do Departamento Operacional!",
+                    datatime=timezone.now(),
+                )
+        log.save()
+        messages.success(request, f'Você exonerou {user.username} como Líder do Departamento Operacional!')
+        return redirect('LDPO')
+
+class DPOMembroView(GroupRequiredMixin, ListView):
+    template_name = 'DPOMembro.html'
+    model = PolicialUsuario
+    context_object_name = 'policiais'
+    group_required = [u'STAFF', u'LDPO']
+    
+    def get_queryset(self):
+        q = self.request.GET.get('q')
+        grupo_membro = Group.objects.get(name='MEMBRODPO')
+        queryset = PolicialUsuario.objects.exclude(groups=grupo_membro).order_by('patente_order')
+
+        if q:
+            queryset = queryset.filter(username__icontains=q)
+
+        return queryset
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        #Grupo de Jornalista 
+        membro = 'MEMBRODPO'
+        #Lógica para testar os Militares se fazem parte dos grupos
+        try:
+            grupo_membro = Group.objects.get(name=membro)
+            context['membros'] = PolicialUsuario.objects.filter(groups=grupo_membro).order_by('patente_order')
+        except Group.DoesNotExist:
+            context['membros'] = PolicialUsuario.objects.none()
+        return context
+    
+class DPOMinistroView(GroupRequiredMixin, ListView):
+    template_name = 'DPOMinistro.html'
+    model = PolicialUsuario
+    context_object_name = 'policiais'
+    group_required = [u'STAFF', u'LDPO']
+    
+    def get_queryset(self):
+        q = self.request.GET.get('q')
+        grupo_membro = Group.objects.get(name='MINISTRODPO')
+        queryset = PolicialUsuario.objects.exclude(groups=grupo_membro).order_by('patente_order')
+
+        if q:
+            queryset = queryset.filter(username__icontains=q)
+
+        return queryset
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        #Grupo de Jornalista 
+        membro = 'MINISTRODPO'
+        #Lógica para testar os Militares se fazem parte dos grupos
+        try:
+            grupo_membro = Group.objects.get(name=membro)
+            context['membros'] = PolicialUsuario.objects.filter(groups=grupo_membro).order_by('patente_order')
+        except Group.DoesNotExist:
+            context['membros'] = PolicialUsuario.objects.none()
+        return context
+    
+class DPOLíderView(GroupRequiredMixin, ListView):
+    template_name = 'DPOLíder.html'
+    model = PolicialUsuario
+    context_object_name = 'policiais'
+    group_required = [u'STAFF']
+    
+    def get_queryset(self):
+        q = self.request.GET.get('q')
+        grupo_membro = Group.objects.get(name='LDPO')
+        queryset = PolicialUsuario.objects.exclude(groups=grupo_membro).order_by('patente_order')
+
+        if q:
+            queryset = queryset.filter(username__icontains=q)
+
+        return queryset
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        #Grupo de Jornalista 
+        membro = 'LDPO'
+        #Lógica para testar os Militares se fazem parte dos grupos
+        try:
+            grupo_membro = Group.objects.get(name=membro)
+            context['membros'] = PolicialUsuario.objects.filter(groups=grupo_membro).order_by('patente_order')
+        except Group.DoesNotExist:
+            context['membros'] = PolicialUsuario.objects.none()
+        return context
+
+class DPOBanimentosView(GroupRequiredMixin, ListView):
+    model = DPOBanimento
+    template_name = 'DPOBanimentos.html'
+    context_object_name = 'relatorios'
+    group_required = [u'STAFF', u'LDPO', u'MINISTRODPO', u'MEMBRODPO']
+
+    def get_queryset(self):
+        q = self.request.GET.get('q')
+        queryset = DPOBanimento.objects.all()
+
+        if q:
+            queryset = queryset.filter(solicitante__username__icontains=q)
+
+        queryset = queryset.order_by('-datatime')
+
+        return queryset
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        ranking = DPOBanimento.objects.all().values('solicitante__username').annotate(total=Count('id')).order_by('-total')
+        context['total'] = DPOBanimento.objects.all().count()
+        context['ranking'] = ranking
+        return context
+    
+class DPORelatoriosView(GroupRequiredMixin, ListView):
+    model = DPORelatório
+    template_name = 'DPORelatórios.html'
+    context_object_name = 'relatorios'
+    group_required = [u'STAFF', u'LDPO', u'MINISTRODPO', u'MEMBRODPO']
+
+    def get_queryset(self):
+        q = self.request.GET.get('q')
+        queryset = DPORelatório.objects.all()
+
+        if q:
+            queryset = queryset.filter(solicitante__username__icontains=q)
+
+        queryset = queryset.order_by('-datatime')
+
+        return queryset
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        ranking = DPORelatório.objects.all().values('solicitante__username').annotate(total=Count('id')).order_by('-total')
+        context['total'] = DPORelatório.objects.all().count()
+        context['ranking'] = ranking
+        return context
+    
+@method_decorator(csrf_protect, name='dispatch')    
+class AdicionarMEMBRODPL(GroupRequiredMixin, View):
+    template_name = 'Form.html'
+    group_required = [u'STAFF', u'LDPL', u'MINISTRODPL']
+    def post(self, request, user_id):
+        user = get_object_or_404(PolicialUsuario, id=user_id)
+        group = Group.objects.get(name='MEMBRODPL')
+        user.groups.add(group)
+        log = LogLota.objects.create(
+                    texto=f"{self.request.user} nomeou {user.username} como Membro do Departamento de Lota!",
+                    datatime=timezone.now(),
+                )
+        log.save()
+        messages.success(request, f'Você nomeou {user.username} como Membro do Departamento de Lota!')
+        return redirect('MEMBRODPL')
+
+@method_decorator(csrf_protect, name='dispatch')
+class RemoverMEMBRODPL(GroupRequiredMixin, View):
+    template_name = 'Form.html'
+    group_required = [u'STAFF', u'LDPL', u'MINISTRODPL']
+    def post(self, request, user_id):
+        user = get_object_or_404(PolicialUsuario, id=user_id)
+        group = Group.objects.get(name='MEMBRODPL')
+        user.groups.remove(group)
+        log = LogLota.objects.create(
+                    texto=f"{self.request.user} exonerou {user.username} como Membro do Departamento Operacional!",
+                    datatime=timezone.now(),
+                )
+        log.save()
+        messages.success(request, f'Você exonerou {user.username} como Membro do Departamento Operacional!')
+        return redirect('MEMBRODPL')
+
+@method_decorator(csrf_protect, name='dispatch')    
+class AdicionarMINISTRODPL(GroupRequiredMixin, View):
+    template_name = 'Form.html'
+    group_required = [u'STAFF', u'LDPL']
+    def post(self, request, user_id):
+        user = get_object_or_404(PolicialUsuario, id=user_id)
+        group = Group.objects.get(name='MINISTRODPL')
+        user.groups.add(group)
+        log = LogLota.objects.create(
+                    texto=f"{self.request.user} nomeou {user.username} como Ministro do Departamento de Lota!",
+                    datatime=timezone.now(),
+                )
+        log.save()
+        messages.success(request, f'Você nomeou {user.username} como Ministro do Departamento de Lota!')
+        return redirect('MINISTRODPL')
+
+@method_decorator(csrf_protect, name='dispatch')
+class RemoverMINISTRODPL(GroupRequiredMixin, View):
+    template_name = 'Form.html'
+    group_required = [u'STAFF', u'LDPL']
+    def post(self, request, user_id):
+        user = get_object_or_404(PolicialUsuario, id=user_id)
+        group = Group.objects.get(name='MINISTRODPL')
+        user.groups.remove(group)
+        log = LogLota.objects.create(
+                    texto=f"{self.request.user} exonerou {user.username} como Ministro do Departamento de Lota!",
+                    datatime=timezone.now(),
+                )
+        log.save()
+        messages.success(request, f'Você exonerou {user.username} como Ministro do Departamento de Lota!')
+        return redirect('MINISTRODPL')
+    
+@method_decorator(csrf_protect, name='dispatch')    
+class AdicionarLDPL(GroupRequiredMixin, View):
+    template_name = 'Form.html'
+    group_required = [u'STAFF']
+    def post(self, request, user_id):
+        user = get_object_or_404(PolicialUsuario, id=user_id)
+        group = Group.objects.get(name='LDPL')
+        user.groups.add(group)
+        log = LogLota.objects.create(
+                    texto=f"{self.request.user} nomeou {user.username} como Líder do Departamento de Lota!",
+                    datatime=timezone.now(),
+                )
+        log.save()
+        messages.success(request, f'Você nomeou {user.username} como Líder do Departamento de Lota!')
+        return redirect('LDPL')
+
+@method_decorator(csrf_protect, name='dispatch')
+class RemoverLDPL(GroupRequiredMixin, View):
+    template_name = 'Form.html'
+    group_required = [u'STAFF']
+    def post(self, request, user_id):
+        user = get_object_or_404(PolicialUsuario, id=user_id)
+        group = Group.objects.get(name='LDPL')
+        user.groups.remove(group)
+        log = LogLota.objects.create(
+                    texto=f"{self.request.user} exonerou {user.username} como Líder do Departamento de Lota!",
+                    datatime=timezone.now(),
+                )
+        log.save()
+        messages.success(request, f'Você exonerou {user.username} como Líder do Departamento de Lota!')
+        return redirect('LDPL')
+    
+class DPLLíderView(GroupRequiredMixin, ListView):
+    template_name = 'DPLLider.html'
+    model = PolicialUsuario
+    context_object_name = 'policiais'
+    group_required = [u'STAFF']
+    
+    def get_queryset(self):
+        q = self.request.GET.get('q')
+        grupo_membro = Group.objects.get(name='LDPL')
+        queryset = PolicialUsuario.objects.exclude(groups=grupo_membro).order_by('patente_order')
+
+        if q:
+            queryset = queryset.filter(username__icontains=q)
+
+        return queryset
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        #Grupo de Jornalista 
+        membro = 'LDPL'
+        #Lógica para testar os Militares se fazem parte dos grupos
+        try:
+            grupo_membro = Group.objects.get(name=membro)
+            context['membros'] = PolicialUsuario.objects.filter(groups=grupo_membro).order_by('patente_order')
+        except Group.DoesNotExist:
+            context['membros'] = PolicialUsuario.objects.none()
+        return context
+    
+class DPLMinistroView(GroupRequiredMixin, ListView):
+    template_name = 'DPLMinistro.html'
+    model = PolicialUsuario
+    context_object_name = 'policiais'
+    group_required = [u'STAFF']
+    
+    def get_queryset(self):
+        q = self.request.GET.get('q')
+        grupo_membro = Group.objects.get(name='MINISTRODPL')
+        queryset = PolicialUsuario.objects.exclude(groups=grupo_membro).order_by('patente_order')
+
+        if q:
+            queryset = queryset.filter(username__icontains=q)
+
+        return queryset
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        #Grupo de Jornalista 
+        membro = 'MINISTRODPL'
+        #Lógica para testar os Militares se fazem parte dos grupos
+        try:
+            grupo_membro = Group.objects.get(name=membro)
+            context['membros'] = PolicialUsuario.objects.filter(groups=grupo_membro).order_by('patente_order')
+        except Group.DoesNotExist:
+            context['membros'] = PolicialUsuario.objects.none()
+        return context
+    
+class DPLMembroView(GroupRequiredMixin, ListView):
+    template_name = 'DPLMembro.html'
+    model = PolicialUsuario
+    context_object_name = 'policiais'
+    group_required = [u'STAFF']
+    
+    def get_queryset(self):
+        q = self.request.GET.get('q')
+        grupo_membro = Group.objects.get(name='MEMBRODPL')
+        queryset = PolicialUsuario.objects.exclude(groups=grupo_membro).order_by('patente_order')
+
+        if q:
+            queryset = queryset.filter(username__icontains=q)
+
+        return queryset
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        #Grupo de Jornalista 
+        membro = 'MEMBRODPL'
+        #Lógica para testar os Militares se fazem parte dos grupos
+        try:
+            grupo_membro = Group.objects.get(name=membro)
+            context['membros'] = PolicialUsuario.objects.filter(groups=grupo_membro).order_by('patente_order')
+        except Group.DoesNotExist:
+            context['membros'] = PolicialUsuario.objects.none()
+        return context
+    
+class LotaView(GroupRequiredMixin, ListView):
+    model = Lota
+    template_name = 'Lotas.html'
+    context_object_name = 'relatorios'
+    group_required = [u'STAFF', u'LDPL', u'MINISTRODPL', u'MEMBRODPL']
+
+    def get_queryset(self):
+        q = self.request.GET.get('q')
+        queryset = Lota.objects.all()
+
+        if q:
+            queryset = queryset.filter(solicitante__username__icontains=q)
+
+        queryset = queryset.order_by('-datatime')
+
+        return queryset
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        ranking = Lota.objects.all().values('solicitante__username').annotate(total=Count('id')).order_by('-total')
+        context['total'] = Lota.objects.all().count()
+        context['ranking'] = ranking
+        return context
