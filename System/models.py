@@ -21,6 +21,12 @@ STATUS = (
           ('Reprovado', 'Reprovado'),
       )
 
+BASE = (
+          ('Abertura', 'Abertura'),
+          ('Pausa', 'Pausa'),
+          ('Fechamento', 'Fechamento'),
+      )
+
 PROMOCAO = {
     'Agente': 'Cabo',
     'Cabo': 'Sargento',
@@ -314,6 +320,8 @@ class DPORelatório(models.Model):
     #Usuário que registrou o treinamento
     solicitante = models.ForeignKey(get_user_model(), on_delete=models.CASCADE,blank=True, null=True, related_name='solicitantedpo')
     #Contador
+    base = models.CharField(choices=BASE, blank=False, null=True, max_length=50)
+
     militares = models.IntegerField(default=0, editable=True)
     #Contador
     fundação = models.IntegerField(default=0, editable=True)

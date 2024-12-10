@@ -103,8 +103,9 @@ class DestaqueForm(forms.ModelForm):
 class DPORelatórioForm(forms.ModelForm):
     class Meta:
         model = DPORelatório
-        fields = ['militares','fundação', 'motivo', 'imagem',]
+        fields = ['base','militares','fundação', 'motivo', 'imagem',]
         widgets = {
+            'base': forms.Select(attrs={'class': 'form-control'}),
             'militares': forms.NumberInput(attrs={'class': 'form-control'}),
             'fundação': forms.NumberInput(attrs={'class': 'form-control'}),
             'motivo': forms.TextInput(attrs={'class': 'form-control'}),

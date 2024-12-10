@@ -61,8 +61,8 @@ class PainelPrincipal(LoginRequiredMixin,TemplateView,FormMixin):
     def get(self, request, *args, **kwargs):
         search_term = request.GET.get('search', '') 
         policial = PolicialUsuario.objects.filter(username__icontains=search_term) if search_term else None
-
         context = {
+            'postagens': PostagemJornal.objects.last(),
             'form': self.get_form(),
             'posts': Post.objects.all().order_by('-data'),
             'comentario_form': self.comentario_form_class(),
@@ -494,8 +494,15 @@ class RegistrarRelatorioTreinamento(GroupRequiredMixin, CreateView):
                     datatime=timezone.now(),
                 )
                 log.save()
-                if new.treinamento.titulo == "Curso de Formação de Agentes":
+                if new.treinamento.titulo.strip() == "Curso de Formação de Agentes":
                     aprovado_username = new.aprovado.strip()  # Supondo que 'aprovado' seja o campo com o nome de usuário
+                    log0 = LogTimeLine.objects.create(
+                                    policial=new.aprovado,
+                                    texto=f"O policial {new.aprovado} ingressou na RHC!",
+                                    datatime=timezone.now(),
+                                    requerimento='Ingresso'
+                                )
+                    log0.save()
                     if aprovado_username:
                         User = get_user_model()
                         try:
@@ -508,13 +515,36 @@ class RegistrarRelatorioTreinamento(GroupRequiredMixin, CreateView):
                                 password='fauiuaufauj20981428042',  # Defina uma senha padrão ou gere uma
                                 patente='Agente',
                             )
-                log0 = LogTimeLine.objects.create(
-                                    policial=new.aprovado,
-                                    texto=f"O policial {new.aprovado} ingressou na RHC!",
-                                    datatime=timezone.now(),
-                                    requerimento='Ingresso'
+
+                if new.treinamento.titulo.strip() == "Curso de Lotas [CDL]":
+                    aprovado_username = new.aprovado.strip()
+                    User = get_user_model()
+                    user = User.objects.get(username=aprovado_username)
+                    try:
+                        group = Group.objects.get(name='MEMBRODPL')
+                        user.groups.add(group)
+                        log = LogLota.objects.create(
+                        texto=f"{user.username} foi aprovado no Curso de Lotas [CDL] e se tornou Membro do Departamento de Lotas!",
+                        datatime=timezone.now(),
                                 )
-                log0.save()
+                        log.save()
+                    except User.DoesNotExist:
+                        return 
+                    
+                if new.treinamento.titulo.strip() == "Treinamento para Guias [T.G]":
+                    aprovado_username = new.aprovado.strip()
+                    User = get_user_model()
+                    user = User.objects.get(username=aprovado_username)
+                    try:
+                        group = Group.objects.get(name='GuiaDpE')
+                        user.groups.add(group)
+                        log = LogTreinamento.objects.create(
+                        texto=f"{user.username} foi aprovado no Treinamento para Guias [T.G] e se tornou Guia do Departamento Educacional!",
+                        datatime=timezone.now(),
+                                )
+                        log.save()
+                    except User.DoesNotExist:
+                        return 
                 # Criando o log de aprovação
                 log = LogTimeLine.objects.create(
                                     policial=new.aprovado,
@@ -1924,11 +1954,11 @@ class RemoverMEMBRODPL(GroupRequiredMixin, View):
         group = Group.objects.get(name='MEMBRODPL')
         user.groups.remove(group)
         log = LogLota.objects.create(
-                    texto=f"{self.request.user} exonerou {user.username} como Membro do Departamento Operacional!",
+                    texto=f"{self.request.user} exonerou {user.username} como Membro do Departamento de Lota!",
                     datatime=timezone.now(),
                 )
         log.save()
-        messages.success(request, f'Você exonerou {user.username} como Membro do Departamento Operacional!')
+        messages.success(request, f'Você exonerou {user.username} como Membro do Departamento de Lota!')
         return redirect('MEMBRODPL')
 
 @method_decorator(csrf_protect, name='dispatch')    

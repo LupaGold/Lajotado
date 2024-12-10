@@ -90,6 +90,25 @@
       {% endif %}
     </div>
       {% endif %}
+      {% if postagens%}
+            <div class="container d-flex mb-2 mb-lg-0 mt-4 ">
+                <div>
+                    <img src="{% static 'jornal.png'%}" alt="">
+                </div>
+                    <div class="ms-2 text-light">
+                    <h3>Notícias</h3>
+                    <p>Fica antenado as notícias da RHC!</p>
+                    </div>
+                    </div>
+                <div class="card col-12 mb-3 shadow m-auto" style="background-color: #181818;">
+                  <img src="{{ postagens.imagem.url }}" class="card-img-top" alt="...">
+                  <div class="card-body text-light">
+                    <h5 class="card-title">{{postagens.titulo}}</h5>
+                    <p class="card-text">{{postagens.descricao}}</p>
+                    <p class="card-text"><small> Postado em {{postagens.datatime}} por {{postagens.solicitante.patente}} {{postagens.solicitante.username}}</small></p> <a  href="{% url "PostagensJornal" postagens.slug %}" style="background:silver;" class="btn">Ler mais...</a>
+                  </div>
+                </div>
+                {% endif %}
         <div class="container text-light d-flex mb-2 mb-lg-0 mt-4 ">
             <div>
                 <img src="{% static 'forum.gif'%}" alt="">
