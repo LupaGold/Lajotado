@@ -255,7 +255,7 @@ class Requerimento(models.Model):
 
     cargo = models.CharField(choices=CARGOS, blank=True, null=True, max_length=50, default='Agente')
     #Obs
-    obs = models.TextField(blank=False, null=True, verbose_name='Observações', max_length=150)
+    obs = models.TextField(blank=False, null=True, verbose_name='Observações', max_length=400)
     #Requerimento
     requerimento = models.CharField(choices=REQUERIMENTO, blank=False, null=True, max_length=50, verbose_name='Tipo')
     #Status

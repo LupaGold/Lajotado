@@ -9,6 +9,7 @@ class GroupContextMiddleware(MiddlewareMixin):
         response.context_data['MinistroDpE'] = request.user.groups.filter(name='MinistroDpE').exists()
         response.context_data['LDPE'] = request.user.groups.filter(name='LDPE').exists()
         response.context_data['Analista'] = request.user.groups.filter(name='Analista').exists()
+        response.context_data['MINISTRODRH'] = request.user.groups.filter(name='MINISTRODRH').exists()
         response.context_data['LDRH'] = request.user.groups.filter(name='LDRH').exists()
         response.context_data['STAFF'] = request.user.groups.filter(name='STAFF').exists()
         response.context_data['MEMBRODPO'] = request.user.groups.filter(name='MEMBRODPO').exists()

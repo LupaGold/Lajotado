@@ -20,7 +20,7 @@ from .views import (
     ResetarSenha, PoliciaisView, ResetarSenhaStaff, PoliciaisStaffView, CriarDestaque, RegistrarDPOBanimento, RegistrarDPORelatório,
     RegistrarLota, LogDPOView, LogLotaView, AdicionarLDPO, AdicionarMEMBRODPO, AdicionarMINISTRODPO, RemoverLDPO, RemoverMEMBRODPO, RemoverMINISTRODPO,
     DPOMembroView, DPOMinistroView, DPOLíderView, DPOBanimentosView, DPORelatoriosView, RegistrarLota, AdicionarLDPL, RemoverLDPL, AdicionarMEMBRODPL, RemoverMEMBRODPL,
-    AdicionarMINISTRODPL, RemoverMINISTRODPL, DPLLíderView, DPLMembroView, DPLMinistroView, LotaView
+    AdicionarMINISTRODPL, RemoverMINISTRODPL, DPLLíderView, DPLMembroView, DPLMinistroView, LotaView, AdicionarMINISTRODRH, RemoverMINISTRODRH, MINISTRODRHView
     )
 
 def custom_logout(request):
@@ -101,9 +101,12 @@ urlpatterns = [
     path('drh/registrar-requerimentos/', RegistrarRequerimento.as_view(), name='RegistrarRequerimento'),
     path('drh/aprovar-requerimento/<int:relatorio_id>/', AprovarRequerimento.as_view(), name='AprovarRequerimento'),
     path('drh/reprovar-requerimento/<int:relatorio_id>/', ReprovarRequerimento.as_view(), name='ReprovarRequerimento'),
-    path('drh/adicionar/<int:user_id>/', AdicionarAnalista.as_view(), name='AdicionarAnalista'),
-    path('drh/remover/<int:user_id>/', RemoverAnalista.as_view(), name='RemoverAnalista'),
+    path('drh/analista/adicionar/<int:user_id>/', AdicionarAnalista.as_view(), name='AdicionarAnalista'),
+    path('drh/remover/analista/<int:user_id>/', RemoverAnalista.as_view(), name='RemoverAnalista'),
+    path('drh/adicionar/ministro/<int:user_id>/', AdicionarMINISTRODRH.as_view(), name='AdicionarMINISTRODRH'),
+    path('drh/remover/ministro/<int:user_id>/', RemoverMINISTRODRH.as_view(), name='RemoverMINISTRODRH'),
     path('drh/analistas/', AnalistasView.as_view(), name='Analista'),
+    path('drh/ministros/', MINISTRODRHView.as_view(), name='MINISTRODRH'),
     path('drh/policiais-lista/', PoliciaisView.as_view(), name='PoliciaisLista'),
     path('drh/policiais-lista/alterar-senha/<int:user_id>/', ResetarSenha.as_view(), name='ResetarSenha'),
 

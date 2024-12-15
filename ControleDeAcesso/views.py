@@ -26,7 +26,7 @@ class AlterarSenhaView(LoginRequiredMixin, PasswordChangeView):
         context['players_data'] =  PolicialUsuario.objects.filter(username=self.request.user)
         context["titulo"] = 'Alterar Senha'
         context["image"] = 'cadeado.gif'
-        context["descricao"] = 'Uma senha segura envita acessos indesejados em sua conta!'
+        context["descricao"] = 'Uma senha segura evita acessos indesejados em sua conta!'
         return context
 
 class LoginViewModificada(LoginView):

@@ -48,6 +48,7 @@
           <strong>Solicitante:</strong>{{relatorio.solicitante.patente}} {{relatorio.solicitante.username}} <br>
           <strong>Policial:</strong> {{relatorio.policial}} <br>
           <strong>Observação:</strong> {{relatorio.obs}} <br>
+          {% if STAFF or LDRH or MINISTRODRH %}
           <div class='d-flex'>
             {% if relatorio.status == 'Em análise...' or relatorio.status == 'Reprovado' %}
             <form class="m-1" action="{% url 'AprovarRequerimento' relatorio.id %}" method="post">
@@ -61,6 +62,7 @@
                 <button class="btn btn-danger btn-sm" type="submit">Reprovar</button>
             </form>{% endif %}
           </div>
+          {% endif %}
         </div>
       </div>
 

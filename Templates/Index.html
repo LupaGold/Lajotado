@@ -199,7 +199,7 @@
               </ul>
             </li>
             {% endif %}
-            {% if STAFF or Analista or LDRH %}
+            {% if STAFF or Analista or LDRH or MINISTRODRH %}
             <li class="mt-2">
               <div class="iocn-link">
                 <a href="#">
@@ -212,13 +212,14 @@
               </div>
               <ul class="sub-menu">
                 <li><a class="link_name" href="#">DrH</a></li>
-                {% if STAFF or LDRH or Analista %}
+                {% if STAFF or LDRH or Analista or MINISTRODRH%}
                 <li><a href="{% url "Requerimentos" %}">Requerimentos</a></li>
                 <li><a href="{% url "RegistrarRequerimento" %}">Add Requerimento</a></li>
                 <li><a href="{% url "RegistrarRequerimentoContrato" %}">Contratar</a></li>
                 {% endif %}
                 {% if STAFF or LDRH %}
                 <li><a href="{% url "Analista" %}">Analistas</a></li>
+                <li><a href="{% url "MINISTRODRH" %}">Ministros</a></li>
                 <li><a href="{% url "PoliciaisLista" %}">Senhas</a></li>
                 {% endif %}
               </ul>

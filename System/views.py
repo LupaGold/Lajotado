@@ -484,7 +484,7 @@ class RegistrarRelatorioTreinamento(GroupRequiredMixin, CreateView):
         if form.is_valid():
             form.instance.solicitante = self.request.user
             form.instance.datatime = timezone.now()
-            if form.instance.treinamento.titulo == "Curso de Formação de Agentes":
+            if form.instance.treinamento.titulo == "Curso de Formação de Agentes [CFA]":
                 form.instance.status = 'Aprovado'
             new = form.save()
 
@@ -494,7 +494,7 @@ class RegistrarRelatorioTreinamento(GroupRequiredMixin, CreateView):
                     datatime=timezone.now(),
                 )
                 log.save()
-                if new.treinamento.titulo.strip() == "Curso de Formação de Agentes":
+                if new.treinamento.titulo.strip() == "Curso de Formação de Agentes [CFA]":
                     aprovado_username = new.aprovado.strip()  # Supondo que 'aprovado' seja o campo com o nome de usuário
                     log0 = LogTimeLine.objects.create(
                                     policial=new.aprovado,
@@ -596,7 +596,7 @@ class AprovarRelatorio(GroupRequiredMixin, View):
         relatorio.status = 'Aprovado'
         relatorio.save()
         # Verificando se o relatório está relacionado ao treinamento "Curso de Formação de Agentes"
-        if relatorio.treinamento.titulo == "Curso de Formação de Agentes":
+        if relatorio.treinamento.titulo == "Curso de Formação de Agentes [CFA]":
             aprovado_username = relatorio.aprovado.strip()  # Supondo que 'aprovado' seja o campo com o nome de usuário
 
             if aprovado_username:
@@ -905,7 +905,7 @@ class Requerimentos(GroupRequiredMixin, ListView):
         return context
 
 class ReprovarRequerimento(GroupRequiredMixin, View):
-    group_required = [u'STAFF', u'Analista', u'LDRH']
+    group_required = [u'STAFF', u'MINISTRODRH', u'LDRH']
     def post(self, request, *args, **kwargs):
         relatorio_id = kwargs.get('relatorio_id')
         relatorio = get_object_or_404(Requerimento, id=relatorio_id)
@@ -920,7 +920,7 @@ class ReprovarRequerimento(GroupRequiredMixin, View):
         return HttpResponseRedirect(reverse('Requerimentos'))
 
 class AprovarRequerimento(GroupRequiredMixin, View):
-    group_required = [u'STAFF', u'Analista', u'LDRH']
+    group_required = [u'STAFF', u'MINISTRODRH', u'LDRH']
     @method_decorator(csrf_protect)
     def post(self, request, *args, **kwargs):
         # Obtém o ID do relatório da URL
@@ -1622,7 +1622,7 @@ class RegistrarDPORelatório(GroupRequiredMixin, CreateView):
     model = DPORelatório
     template_name = 'Form.html'
     form_class = DPORelatórioForm
-    group_required = [u'STAFF', u'LDPO', u'MINISTRODPO' u'MEMBRODPO']
+    group_required = [u'STAFF', u'LDPO', u'MINISTRODPO', u'MEMBRODPO']
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -2127,4 +2127,63 @@ class LotaView(GroupRequiredMixin, ListView):
         ranking = Lota.objects.all().values('solicitante__username').annotate(total=Count('id')).order_by('-total')
         context['total'] = Lota.objects.all().count()
         context['ranking'] = ranking
+        return context
+    
+@method_decorator(csrf_protect, name='dispatch')
+class AdicionarMINISTRODRH(GroupRequiredMixin, View):
+    template_name = 'Form.html'
+    group_required = [u'STAFF', u'LDRH']
+    def post(self, request, user_id):
+        user = get_object_or_404(PolicialUsuario, id=user_id)
+        group = Group.objects.get(name='MINISTRODRH')
+        user.groups.add(group)
+        log = LogStaff.objects.create(
+                    texto=f"{self.request.user} nomeou {user.username} como Ministro do Departamento de Recursos Humanos!",
+                    datatime=timezone.now(),
+                )
+        log.save()
+        messages.success(request, f'Você nomeou {user.username} como Ministro do Departamento de Recursos Humanos!')
+        return redirect('MINISTRODRH')
+
+@method_decorator(csrf_protect, name='dispatch')
+class RemoverMINISTRODRH(GroupRequiredMixin, View):
+    template_name = 'Form.html'
+    group_required = [u'STAFF', u'LDRH']
+    def post(self, request, user_id):
+        user = get_object_or_404(PolicialUsuario, id=user_id)
+        group = Group.objects.get(name='MINISTRODRH')
+        user.groups.remove(group)
+        log = LogStaff.objects.create(
+                    texto=f"{self.request.user} exonerou {user.username} como Ministro do Departamento de Recursos Humanos!",
+                    datatime=timezone.now(),
+                )
+        log.save()
+        messages.success(request, f'Você exonerou {user.username} como Ministro do Departamento de Recursos Humanos!')
+        return redirect('MINISTRODRH')
+    
+class MINISTRODRHView(GroupRequiredMixin, ListView):
+    template_name = 'MINISTRODRH.html'
+    model = PolicialUsuario
+    context_object_name = 'policiais'
+    group_required = [u'STAFF', u'LDRH']
+    
+    def get_queryset(self):
+        q = self.request.GET.get('q')
+        grupo_membro = Group.objects.get(name='MINISTRODRH')
+        queryset = PolicialUsuario.objects.exclude(groups=grupo_membro).order_by('patente_order')
+
+        if q:
+            queryset = queryset.filter(username__icontains=q)
+
+        return queryset
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        #Grupo de Jornalista 
+        membro = 'MINISTRODRH'
+        #Lógica para testar os Militares se fazem parte dos grupos
+        try:
+            grupo_membro = Group.objects.get(name=membro)
+            context['membros'] = PolicialUsuario.objects.filter(groups=grupo_membro).order_by('patente_order')
+        except Group.DoesNotExist:
+            context['membros'] = PolicialUsuario.objects.none()
         return context
